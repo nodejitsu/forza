@@ -14,7 +14,6 @@
 static uv_loop_t *loop;
 static uv_connect_t connect_req;
 static uv_tcp_t client;
-static uv_write_t write_req;
 static char hostname[512];
 
 static uv_timer_t heartbeat;
@@ -48,13 +47,15 @@ void send_data(char *name, char *state, double value) {
   int r;
   uv_buf_t send_buf;
   uv_stream_t *stream;
+  uv_write_t* write_req;
   char *json_data = make_json(name, state, value);
 
+  write_req = malloc(sizeof *write_req);
   send_buf = uv_buf_init(json_data, sizeof(char) * strlen(json_data));
 
   stream = connect_req.handle;
 
-  r = uv_write(&write_req, stream, &send_buf, 1, after_write);
+  r = uv_write(write_req, stream, &send_buf, 1, after_write);
   if (r) {
     fprintf(stderr, "uv_write: %s\n", uv_strerror(uv_last_error(loop)));
     return;
