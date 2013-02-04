@@ -17,6 +17,10 @@ static uv_tcp_t client;
 static uv_write_t write_req;
 static char hostname[512];
 
+static uv_timer_t heartbeat;
+static uv_timer_t mem_timer;
+static uv_timer_t cpu_timer;
+
 char* make_json(char *name, char *state, double value) {
   char *json_buf;
   /* We PROBABLY won't ever need to send more than 1kb of JSON at one time. */
@@ -59,11 +63,17 @@ void send_data(char *name, char *state, double value) {
 }
 
 void send_heartbeat(uv_timer_t *timer, int status) {
+#ifdef DEBUG
+  printf("heartbeat timer fired, status %d\n", status);
+#endif
   send_data("heartbeat", "info", 0);
 }
 
 void send_cpu_usage(uv_timer_t *timer, int status) {
   double loadinfo[3];
+#ifdef DEBUG
+  printf("cpu usage timer fired, status %d\n", status);
+#endif
 #ifdef __sun
   /* On SunOS, if we're not in a global zone, uv_loadavg returns [0, 0, 0] */
   /* This, instead, gets the loadavg for our assigned processor set. */
@@ -81,6 +91,9 @@ void send_mem_usage(uv_timer_t *timer, int status) {
   uint64_t freemem = uv_get_free_memory();
   uint64_t totalmem = uv_get_total_memory();
 
+#ifdef DEBUG
+  printf("memory usage timer fired, status %d\n", status);
+#endif
   mempct = (double)(totalmem - freemem) / (double)totalmem;
   send_data("Memory Usage (%)", "info", mempct);
 }
@@ -93,13 +106,18 @@ void on_connect(uv_connect_t *req, int status) {
 #ifdef DEBUG
   printf("Successfully connected!\n");
 #endif
+
+  /* Setup timers for heartbeat and resource reporting */
+  uv_timer_init(loop, &heartbeat);
+  uv_timer_init(loop, &mem_timer);
+  uv_timer_init(loop, &cpu_timer);
+
+  uv_timer_start(&heartbeat, send_heartbeat, 0, 10000);
+  uv_timer_start(&mem_timer, send_mem_usage, 0, 5000);
+  uv_timer_start(&cpu_timer, send_cpu_usage, 0, 15000);
 }
 
 int main(int argc, char *argv[]) {
-  uv_timer_t heartbeat;
-  uv_timer_t mem_timer;
-  uv_timer_t cpu_timer;
-
   loop = uv_default_loop();
   /* Get the hostname so that it can be provided to the server */
   gethostname(hostname, sizeof(hostname));
@@ -111,15 +129,6 @@ int main(int argc, char *argv[]) {
   uv_tcp_keepalive(&client, 1, 180);
   uv_tcp_connect(&connect_req, &client, addr, on_connect);
 
-  /* Setup timers for heartbeat and resource reporting */
-  uv_timer_init(loop, &heartbeat);
-  uv_timer_init(loop, &mem_timer);
-  uv_timer_init(loop, &cpu_timer);
-
-  uv_timer_start(&heartbeat, send_heartbeat, 60000, 60000);
-  uv_timer_start(&mem_timer, send_mem_usage, 5000, 5000);
-  uv_timer_start(&cpu_timer, send_cpu_usage, 15000, 15000);
-
-  uv_run(loop);
+  uv_run(loop, UV_RUN_DEFAULT);
   return 0;
 }
