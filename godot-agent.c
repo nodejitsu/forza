@@ -3,18 +3,18 @@
 #include <string.h>
 #include <unistd.h>
 #include "deps/libuv/include/uv.h"
+#include "options.h"
 
 #ifdef __sun
 #include <sys/pset.h>
 #include <sys/loadavg.h>
 #endif
 
-#define DEBUG 1
-
 static uv_loop_t *loop;
 static uv_connect_t connect_req;
 static uv_tcp_t client;
 static char hostname[512];
+static options_t opts;
 
 static uv_timer_t heartbeat;
 static uv_timer_t mem_timer;
@@ -68,8 +68,14 @@ void send_heartbeat(uv_timer_t *timer, int status) {
 #ifdef DEBUG
   printf("heartbeat timer fired, status %d\n", status);
 #endif
-  /* TODO: This needs to use a non-fatal uv_kill() check on a target process.*/
-  send_data("heartbeat", "info", 0);
+  uv_err_t err;
+  err = uv_kill(opts.pid, 0);
+  if (err.code != UV_OK) {
+    send_data("heartbeat", "critical", 0);
+  }
+  else {
+    send_data("heartbeat", "ok", 0);
+  }
 }
 
 void send_cpu_usage(uv_timer_t *timer, int status) {
@@ -115,19 +121,20 @@ void on_connect(uv_connect_t *req, int status) {
   uv_timer_init(loop, &mem_timer);
   uv_timer_init(loop, &cpu_timer);
 
-  uv_timer_start(&heartbeat, send_heartbeat, 0, 10000);
-  uv_timer_start(&mem_timer, send_mem_usage, 0, 5000);
-  uv_timer_start(&cpu_timer, send_cpu_usage, 0, 15000);
+  uv_timer_start(&heartbeat, send_heartbeat, 0, opts.interval);
+  uv_timer_start(&mem_timer, send_mem_usage, 0, opts.interval);
+  uv_timer_start(&cpu_timer, send_cpu_usage, 0, opts.interval);
 }
 
 int main(int argc, char *argv[]) {
+  opts = options_parse(argc, argv);
   loop = uv_default_loop();
   /* Get the hostname so that it can be provided to the server */
   gethostname(hostname, sizeof(hostname));
 
   /* Set up a TCP keepalive connection to the godot server */
   /* TODO: make the host and port more easily configurable */
-  struct sockaddr_in addr = uv_ip4_addr("127.0.0.1", 1337);
+  struct sockaddr_in addr = uv_ip4_addr(opts.host, opts.port);
   uv_tcp_init(loop, &client);
   uv_tcp_keepalive(&client, 1, 180);
   uv_tcp_connect(&connect_req, &client, addr, on_connect);
