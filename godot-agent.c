@@ -41,13 +41,14 @@ void after_write(uv_write_t *req, int status) {
   if (status) {
     fprintf(stderr, "uv_write error: %s\n", uv_strerror(uv_last_error(loop)));
   } 
+  free(req);
 }
 
 void send_data(char *name, char *state, double value) {
   int r;
   uv_buf_t send_buf;
   uv_stream_t *stream;
-  uv_write_t* write_req;
+  uv_write_t *write_req;
   char *json_data = make_json(name, state, value);
 
   write_req = malloc(sizeof *write_req);
@@ -67,6 +68,7 @@ void send_heartbeat(uv_timer_t *timer, int status) {
 #ifdef DEBUG
   printf("heartbeat timer fired, status %d\n", status);
 #endif
+  /* TODO: This needs to use a non-fatal uv_kill() check on a target process.*/
   send_data("heartbeat", "info", 0);
 }
 
