@@ -17,7 +17,7 @@ endif
 all: libuv godot-agent
 
 godot-agent: godot-agent.c
-	gcc $(CFLAGS) -o godot-agent godot-agent.c deps/libuv/libuv.a
+	gcc $(CFLAGS) -o godot-agent godot-agent.c options.c deps/libuv/libuv.a
 
 libuv: 
 	make -C deps/libuv/
