@@ -19,12 +19,12 @@ ifeq (SunOS, $(uname_S))
   LDFLAGS=-lsendfile -lsocket -lkstat -lnsl -lm
 endif
 
-all: libuv godot
+all: libuv estragon
 
 src/%.o: src/%.c
 	gcc $(CFLAGS) -c $< -o $@
 
-godot: $(OBJS)
+estragon: $(OBJS)
 	gcc $(LDFLAGS) deps/libuv/libuv.a $^ -o $@
 
 libuv:
