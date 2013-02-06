@@ -3,7 +3,7 @@
 OBJS += src/estragon.o
 OBJS += src/options.o
 
-CFLAGS=-g -Wall -Ideps/libuv/include
+CFLAGS=-g -Wall -Ideps/libuv/include -DPLUGIN_INIT_CALLS='$(PLUGIN_INIT_CALLS)'
 
 uname_S=$(shell uname -s)
 
@@ -22,6 +22,9 @@ endif
 all: libuv estragon
 
 src/%.o: src/%.c
+	gcc $(CFLAGS) -c $< -o $@
+
+src/plugins/%.o: src/plugins/%.c
 	gcc $(CFLAGS) -c $< -o $@
 
 estragon: $(OBJS)

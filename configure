@@ -18,7 +18,9 @@ plugins = unique(args.with_plugin)
 
 print 'Building `estragon` with plugins: ' + ', '.join(plugins)
 
-config += '\n'.join([ 'OBJS += src/plugins/' + plugin + '.o' for plugin in plugins ])
+for plugin in plugins:
+    config += 'OBJS += src/plugins/' + plugin + '.o\n'
+    config += 'PLUGIN_INIT_CALLS += ' + plugin + '_init();\n'
 
 f = open('config.mk', 'w')
 f.write(config + '\n')
