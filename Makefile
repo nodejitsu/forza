@@ -1,32 +1,38 @@
 -include config.mk
 
+OBJS += src/estragon.o
+OBJS += src/options.o
+
 CFLAGS=-g -Wall -Ideps/libuv/include
 
 uname_S=$(shell uname -s)
 
 ifeq (Darwin, $(uname_S))
-CFLAGS+=-framework CoreServices
+  LDFLAGS=-framework CoreServices
 endif
 
 ifeq (Linux, $(uname_S))
-CFLAGS+=-lc -lrt -ldl -lm -lpthread
+  LDFLAGS=-lc -lrt -ldl -lm -lpthread
 endif
 
 ifeq (SunOS, $(uname_S))
-CFLAGS+=-lsendfile -lsocket -lkstat -lnsl -lm
+  LDFLAGS=-lsendfile -lsocket -lkstat -lnsl -lm
 endif
 
-all: libuv godot-agent
+all: libuv godot
 
-godot-agent: godot-agent.c
-	gcc $(CFLAGS) -o godot-agent godot-agent.c options.c deps/libuv/libuv.a
+src/%.o: src/%.c
+	gcc $(CFLAGS) -c $< -o $@
 
-libuv: 
+godot: $(OBJS)
+	gcc $(LDFLAGS) deps/libuv/libuv.a $^ -o $@
+
+libuv:
 	make -C deps/libuv/
 
 clean:
-	rm -f godot-agent
+	rm -f estragon
 
 cleanall:
-	rm -f godot-agent
+	rm -f estragon
 	make clean -C deps/libuv/
