@@ -5,11 +5,6 @@
 #include "../deps/libuv/include/uv.h"
 #include "options.h"
 
-#ifdef __sun
-#include <sys/pset.h>
-#include <sys/loadavg.h>
-#endif
-
 static uv_loop_t *loop;
 static uv_connect_t connect_req;
 static uv_tcp_t client;
@@ -18,7 +13,6 @@ static options_t opts;
 
 static uv_timer_t heartbeat;
 static uv_timer_t mem_timer;
-static uv_timer_t cpu_timer;
 
 char* make_json(char *name, char *state, double value) {
   char *json_buf;
@@ -78,22 +72,6 @@ void send_heartbeat(uv_timer_t *timer, int status) {
   }
 }
 
-void send_cpu_usage(uv_timer_t *timer, int status) {
-  double loadinfo[3];
-#ifdef DEBUG
-  printf("cpu usage timer fired, status %d\n", status);
-#endif
-#ifdef __sun
-  /* On SunOS, if we're not in a global zone, uv_loadavg returns [0, 0, 0] */
-  /* This, instead, gets the loadavg for our assigned processor set. */
-  pset_getloadavg(PS_MYID, loadinfo, 3);
-#else
-  uv_loadavg(loadinfo);
-#endif
-  send_data("CPU load, last minute", "info", loadinfo[0]);
-  send_data("CPU load, last 5 minutes", "info", loadinfo[1]);
-  send_data("CPU load, last 15 minutes", "info", loadinfo[2]);
-}
 
 void send_mem_usage(uv_timer_t *timer, int status) {
   double mempct;
@@ -119,11 +97,11 @@ void on_connect(uv_connect_t *req, int status) {
   /* Setup timers for heartbeat and resource reporting */
   uv_timer_init(loop, &heartbeat);
   uv_timer_init(loop, &mem_timer);
-  uv_timer_init(loop, &cpu_timer);
 
   uv_timer_start(&heartbeat, send_heartbeat, 0, opts.interval);
   uv_timer_start(&mem_timer, send_mem_usage, 0, opts.interval);
-  uv_timer_start(&cpu_timer, send_cpu_usage, 0, opts.interval);
+
+  PLUGIN_INIT_CALLS
 }
 
 int main(int argc, char *argv[]) {
