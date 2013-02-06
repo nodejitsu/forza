@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+import argparse
+
+def unique(l):
+    r = []
+    for i in l:
+        if i not in r:
+            r.append(i)
+    return r
+
+config = ''
+
+parser = argparse.ArgumentParser(description='Configure `estragon` build.')
+parser.add_argument('--with-plugin', action='append')
+args = parser.parse_args()
+
+plugins = unique(args.with_plugin)
+
+print 'Building `estragon` with plugins: ' + ', '.join(plugins)
+
+config += '\n'.join([ 'OBJS += src/plugins/' + plugin + '.o' for plugin in plugins ])
+
+f = open('config.mk', 'w')
+f.write(config + '\n')
+f.close()
