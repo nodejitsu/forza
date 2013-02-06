@@ -9,7 +9,7 @@
   #define PLUGIN_INIT_CALLS
 #endif
 
-#define _PLUGIN_INIT_CALLS() do { PLUGIN_INIT_CALLS } while(0)
+#define INITIALIZE_PLUGINS() do { PLUGIN_INIT_CALLS } while(0)
 
 static uv_loop_t *loop;
 static uv_connect_t connect_req;
@@ -107,7 +107,7 @@ void on_connect(uv_connect_t *req, int status) {
   uv_timer_start(&heartbeat, send_heartbeat, 0, opts.interval);
   uv_timer_start(&mem_timer, send_mem_usage, 0, opts.interval);
 
-  _PLUGIN_INIT_CALLS();
+  INITIALIZE_PLUGINS();
 }
 
 int main(int argc, char *argv[]) {
