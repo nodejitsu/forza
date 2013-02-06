@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "deps/libuv/include/uv.h"
+#include "../deps/libuv/include/uv.h"
 #include "options.h"
 
 #ifdef __sun
