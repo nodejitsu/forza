@@ -5,6 +5,12 @@
 #include "../deps/libuv/include/uv.h"
 #include "options.h"
 
+#ifndef PLUGIN_INIT_CALLS
+  #define PLUGIN_INIT_CALLS
+#endif
+
+#define _PLUGIN_INIT_CALLS() do { PLUGIN_INIT_CALLS } while(0)
+
 static uv_loop_t *loop;
 static uv_connect_t connect_req;
 static uv_tcp_t client;
@@ -101,7 +107,7 @@ void on_connect(uv_connect_t *req, int status) {
   uv_timer_start(&heartbeat, send_heartbeat, 0, opts.interval);
   uv_timer_start(&mem_timer, send_mem_usage, 0, opts.interval);
 
-  PLUGIN_INIT_CALLS
+  _PLUGIN_INIT_CALLS();
 }
 
 int main(int argc, char *argv[]) {
