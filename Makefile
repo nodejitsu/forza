@@ -1,3 +1,5 @@
+-include config.mk
+
 CFLAGS=-g -Wall -Ideps/libuv/include
 
 uname_S=$(shell uname -s)
