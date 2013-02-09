@@ -4,6 +4,7 @@ OBJS += src/estragon.o
 OBJS += src/options.o
 
 CFLAGS=-g -Wall -Ideps/libuv/include -DPLUGIN_INIT_CALLS='$(PLUGIN_INIT_CALLS)'
+CFLAGS += -DESTRAGON_VERSION_HASH='"$(ESTRAGON_VERSION_HASH)"'
 
 uname_S=$(shell uname -s)
 

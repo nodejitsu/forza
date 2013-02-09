@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import subprocess
 
 def unique(l):
     r = []
@@ -14,13 +15,16 @@ parser = argparse.ArgumentParser(description='Configure `estragon` build.')
 parser.add_argument('--with-plugin', action='append')
 args = parser.parse_args()
 
-plugins = unique(args.with_plugin)
+version = subprocess.check_output(['git', 'log', '-n1', '--pretty=%h'])
+plugins = unique(args.with_plugin or ['heartbeat'])
 
 print 'Building `estragon` with plugins: ' + ', '.join(plugins)
 
 for plugin in plugins:
     config += 'OBJS += src/plugins/' + plugin + '.o\n'
     config += 'PLUGIN_INIT_CALLS += ' + plugin + '_init();\n'
+
+config += 'ESTRAGON_VERSION_HASH = ' + version
 
 f = open('config.mk', 'w')
 f.write(config + '\n')

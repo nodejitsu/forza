@@ -111,6 +111,8 @@ void on_connect(uv_connect_t *req, int status) {
 }
 
 int main(int argc, char *argv[]) {
+  printf("estragon "ESTRAGON_VERSION_HASH"\n");
+
   opts = options_parse(argc, argv);
   loop = uv_default_loop();
   /* Get the hostname so that it can be provided to the server */
