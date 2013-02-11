@@ -17,7 +17,6 @@ static uv_tcp_t client;
 static char hostname[512];
 static options_t opts;
 
-static uv_timer_t heartbeat;
 static uv_timer_t mem_timer;
 
 char* make_json(char *name, char *state, double value) {
@@ -64,19 +63,6 @@ void send_data(char *name, char *state, double value) {
   free(json_data);
 }
 
-void send_heartbeat(uv_timer_t *timer, int status) {
-#ifdef DEBUG
-  printf("heartbeat timer fired, status %d\n", status);
-#endif
-  uv_err_t err;
-  err = uv_kill(opts.pid, 0);
-  if (err.code != UV_OK) {
-    send_data("heartbeat", "critical", 0);
-  }
-  else {
-    send_data("heartbeat", "ok", 0);
-  }
-}
 
 
 void send_mem_usage(uv_timer_t *timer, int status) {
@@ -101,10 +87,8 @@ void on_connect(uv_connect_t *req, int status) {
 #endif
 
   /* Setup timers for heartbeat and resource reporting */
-  uv_timer_init(loop, &heartbeat);
   uv_timer_init(loop, &mem_timer);
 
-  uv_timer_start(&heartbeat, send_heartbeat, 0, opts.interval);
   uv_timer_start(&mem_timer, send_mem_usage, 0, opts.interval);
 
   INITIALIZE_PLUGINS();
