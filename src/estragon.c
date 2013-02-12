@@ -26,12 +26,12 @@ char* make_json(char *name, char *state, double value) {
   json_buf = malloc(sizeof(char) * 1024);
   snprintf(json_buf, 1024, 
       "{"
-      "\"Host\": \"%s\","
-      "\"Service\": \"%s\","
-      "\"State\": \"%s\","
-      "\"Time\": \"%llu\","
-      "\"Metric\": \"%f\","
-      "\"TTL\": \"15\""
+      "\"host\":\"%s\","
+      "\"service\":\"%s\","
+      "\"state\":\"%s\","
+      "\"time\":\"%llu\","
+      "\"metric\":\"%f\","
+      "\"ttl\":\"15\""
       "}\n", hostname, name, state, uv_hrtime(), value);
   return json_buf;
 }
