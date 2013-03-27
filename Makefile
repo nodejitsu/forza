@@ -1,4 +1,4 @@
-CFLAGS=-g -Wall -Ideps/libuv/include
+CFLAGS=-g -Wall -Ideps/libuv/include -Ideps/curl/include
 
 uname_S=$(shell uname -s)
 
