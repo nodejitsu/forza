@@ -25,11 +25,6 @@ void notify_for_flush(uv_curl_t* curl) {
   uv_async_send(doflush);
 }
 
-uv_buf_t alloc_buffer(uv_handle_t* stream, size_t suggested_size) {
-  return uv_buf_init(malloc(suggested_size), suggested_size);
-}
-
-
 size_t read_from_queue(char *ptr, size_t size, size_t nmemb, void *userdata) {
   uv_curl_t* curl = (uv_curl_t*) userdata;
   uv_queue_t* queue = (uv_queue_t*) curl->queue;
@@ -83,6 +78,10 @@ void read_to_curl(uv_stream_t* stream, ssize_t nread, uv_buf_t buf) {
   }
 }
 
+uv_buf_t alloc_buffer(uv_handle_t* stream, size_t suggested_size) {
+  return uv_buf_init(malloc(suggested_size), suggested_size);
+}
+
 int uv_curl_init(uv_loop_t* loop, uv_curl_t* curl, uv_pipe_t* pipe, char* addr) {
   if (curl_global_init(CURL_GLOBAL_ALL)) return 1;
   
@@ -115,4 +114,5 @@ void uv_free_curl(uv_curl_t* curl) {
   curl_easy_cleanup(curl->easy_handle);
   curl_multi_cleanup(curl->multi_handle);
   uv_free_queue(curl->queue);
+  free(curl);
 }
