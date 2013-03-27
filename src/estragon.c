@@ -2,23 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "deps/libuv/include/uv.h"
+#include "../deps/libuv/include/uv.h"
 #include "options.h"
 
-#ifdef __sun
-#include <sys/pset.h>
-#include <sys/loadavg.h>
+#ifndef PLUGIN_INIT_CALLS
+  #define PLUGIN_INIT_CALLS
 #endif
+
+#define INITIALIZE_PLUGINS() do { PLUGIN_INIT_CALLS } while(0)
 
 static uv_loop_t *loop;
 static uv_connect_t connect_req;
 static uv_tcp_t client;
 static char hostname[512];
 static options_t opts;
-
-static uv_timer_t heartbeat;
-static uv_timer_t mem_timer;
-static uv_timer_t cpu_timer;
 
 char* make_json(char *name, char *state, double value) {
   char *json_buf;
@@ -27,12 +24,12 @@ char* make_json(char *name, char *state, double value) {
   json_buf = malloc(sizeof(char) * 1024);
   snprintf(json_buf, 1024, 
       "{"
-      "\"Host\": \"%s\","
-      "\"Service\": \"%s\","
-      "\"State\": \"%s\","
-      "\"Time\": \"%llu\","
-      "\"Metric\": \"%f\","
-      "\"TTL\": \"15\""
+      "\"host\":\"%s\","
+      "\"service\":\"%s\","
+      "\"state\":\"%s\","
+      "\"time\":\"%llu\","
+      "\"metric\":\"%f\","
+      "\"ttl\":\"15\""
       "}\n", hostname, name, state, uv_hrtime(), value);
   return json_buf;
 }
@@ -64,48 +61,6 @@ void send_data(char *name, char *state, double value) {
   free(json_data);
 }
 
-void send_heartbeat(uv_timer_t *timer, int status) {
-#ifdef DEBUG
-  printf("heartbeat timer fired, status %d\n", status);
-#endif
-  uv_err_t err;
-  err = uv_kill(opts.pid, 0);
-  if (err.code != UV_OK) {
-    send_data("heartbeat", "critical", 0);
-  }
-  else {
-    send_data("heartbeat", "ok", 0);
-  }
-}
-
-void send_cpu_usage(uv_timer_t *timer, int status) {
-  double loadinfo[3];
-#ifdef DEBUG
-  printf("cpu usage timer fired, status %d\n", status);
-#endif
-#ifdef __sun
-  /* On SunOS, if we're not in a global zone, uv_loadavg returns [0, 0, 0] */
-  /* This, instead, gets the loadavg for our assigned processor set. */
-  pset_getloadavg(PS_MYID, loadinfo, 3);
-#else
-  uv_loadavg(loadinfo);
-#endif
-  send_data("CPU load, last minute", "info", loadinfo[0]);
-  send_data("CPU load, last 5 minutes", "info", loadinfo[1]);
-  send_data("CPU load, last 15 minutes", "info", loadinfo[2]);
-}
-
-void send_mem_usage(uv_timer_t *timer, int status) {
-  double mempct;
-  uint64_t freemem = uv_get_free_memory();
-  uint64_t totalmem = uv_get_total_memory();
-
-#ifdef DEBUG
-  printf("memory usage timer fired, status %d\n", status);
-#endif
-  mempct = (double)(totalmem - freemem) / (double)totalmem;
-  send_data("Memory Usage (%)", "info", mempct);
-}
 
 void on_connect(uv_connect_t *req, int status) {
   if (status) {
@@ -117,16 +72,13 @@ void on_connect(uv_connect_t *req, int status) {
 #endif
 
   /* Setup timers for heartbeat and resource reporting */
-  uv_timer_init(loop, &heartbeat);
-  uv_timer_init(loop, &mem_timer);
-  uv_timer_init(loop, &cpu_timer);
 
-  uv_timer_start(&heartbeat, send_heartbeat, 0, opts.interval);
-  uv_timer_start(&mem_timer, send_mem_usage, 0, opts.interval);
-  uv_timer_start(&cpu_timer, send_cpu_usage, 0, opts.interval);
+  INITIALIZE_PLUGINS();
 }
 
 int main(int argc, char *argv[]) {
+  printf("estragon "ESTRAGON_VERSION_HASH"\n");
+
   opts = options_parse(argc, argv);
   loop = uv_default_loop();
   /* Get the hostname so that it can be provided to the server */
