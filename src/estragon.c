@@ -17,8 +17,6 @@ static uv_tcp_t client;
 static char hostname[512];
 static options_t opts;
 
-static uv_timer_t mem_timer;
-
 char* make_json(char *name, char *state, double value) {
   char *json_buf;
   /* We PROBABLY won't ever need to send more than 1kb of JSON at one time. */
@@ -64,19 +62,6 @@ void send_data(char *name, char *state, double value) {
 }
 
 
-
-void send_mem_usage(uv_timer_t *timer, int status) {
-  double mempct;
-  uint64_t freemem = uv_get_free_memory();
-  uint64_t totalmem = uv_get_total_memory();
-
-#ifdef DEBUG
-  printf("memory usage timer fired, status %d\n", status);
-#endif
-  mempct = (double)(totalmem - freemem) / (double)totalmem;
-  send_data("Memory Usage (%)", "info", mempct);
-}
-
 void on_connect(uv_connect_t *req, int status) {
   if (status) {
     fprintf(stderr, "on_connect: %s\n", uv_strerror(uv_last_error(loop)));
@@ -87,9 +72,6 @@ void on_connect(uv_connect_t *req, int status) {
 #endif
 
   /* Setup timers for heartbeat and resource reporting */
-  uv_timer_init(loop, &mem_timer);
-
-  uv_timer_start(&mem_timer, send_mem_usage, 0, opts.interval);
 
   INITIALIZE_PLUGINS();
 }
