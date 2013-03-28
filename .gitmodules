@@ -4,3 +4,6 @@
 [submodule "deps/saneopt"]
 	path = deps/saneopt
 	url = https://github.com/mmalecki/saneopt.git
+[submodule "deps/env"]
+	path = deps/env
+	url = https://github.com/mmalecki/env.git
