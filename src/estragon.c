@@ -3,7 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 #include "../deps/libuv/include/uv.h"
-#include "options.h"
+
+#include "../deps/saneopt/include/saneopt.h"
 
 #ifndef PLUGIN_INIT_CALLS
   #define PLUGIN_INIT_CALLS
@@ -15,7 +16,6 @@ static uv_loop_t *loop;
 static uv_connect_t connect_req;
 static uv_tcp_t client;
 static char hostname[512];
-static options_t opts;
 
 char* make_json(char *name, char *state, double value) {
   char *json_buf;
@@ -79,14 +79,17 @@ void on_connect(uv_connect_t *req, int status) {
 int main(int argc, char *argv[]) {
   printf("estragon "ESTRAGON_VERSION_HASH"\n");
 
-  opts = options_parse(argc, argv);
+  saneopt_t* opt = saneopt_init(argc, argv);
+  int port = atoi(saneopt_get(opt, "port"));
+  char* host = saneopt_get(opt, "host");
+
   loop = uv_default_loop();
   /* Get the hostname so that it can be provided to the server */
   gethostname(hostname, sizeof(hostname));
 
   /* Set up a TCP keepalive connection to the godot server */
   /* TODO: make the host and port more easily configurable */
-  struct sockaddr_in addr = uv_ip4_addr(opts.host, opts.port);
+  struct sockaddr_in addr = uv_ip4_addr(host, port);
   uv_tcp_init(loop, &client);
   uv_tcp_keepalive(&client, 1, 180);
   uv_tcp_connect(&connect_req, &client, addr, on_connect);

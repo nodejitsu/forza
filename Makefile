@@ -20,7 +20,7 @@ ifeq (SunOS, $(uname_S))
   LDFLAGS=-lsendfile -lsocket -lkstat -lnsl -lm
 endif
 
-all: libuv estragon
+all: libuv libsaneopt estragon
 
 src/%.o: src/%.c
 	gcc $(CFLAGS) -c $< -o $@
@@ -29,10 +29,13 @@ src/plugins/%.o: src/plugins/%.c
 	gcc $(CFLAGS) -c $< -o $@
 
 estragon: $(OBJS)
-	gcc $(LDFLAGS) deps/libuv/libuv.a $^ -o $@
+	gcc $(LDFLAGS) deps/libuv/libuv.a deps/saneopt/libsaneopt.a $^ -o $@
 
 libuv:
 	make -C deps/libuv/
+
+libsaneopt:
+	make -C deps/saneopt/
 
 clean:
 	rm -f estragon
@@ -40,3 +43,4 @@ clean:
 cleanall:
 	rm -f estragon
 	make clean -C deps/libuv/
+	make clean -C deps/saneopt/
