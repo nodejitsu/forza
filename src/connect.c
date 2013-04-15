@@ -8,9 +8,9 @@
 #include <estragon.h>
 
 char hostname[512];
-static uv_connect_t connect_req;
 uv_tcp_t client;
 uv_loop_t* loop;
+static uv_connect_t connect_req;
 estragon_connect_cb connect_cb;
 
 void estragon__on_connect(uv_connect_t* req, int status) {
@@ -18,6 +18,8 @@ void estragon__on_connect(uv_connect_t* req, int status) {
 }
 
 void estragon_connect(char* host, int port, estragon_connect_cb connect_cb_) {
+  struct sockaddr_in addr = uv_ip4_addr(host, port);
+
   loop = uv_default_loop();
 
   /* Get the hostname so that it can be provided to the server */
@@ -25,7 +27,6 @@ void estragon_connect(char* host, int port, estragon_connect_cb connect_cb_) {
 
   connect_cb = connect_cb_;
   /* Set up a TCP keepalive connection to the godot server */
-  struct sockaddr_in addr = uv_ip4_addr(host, port);
   uv_tcp_init(loop, &client);
   uv_tcp_keepalive(&client, 1, 180);
   uv_tcp_connect(&connect_req, &client, addr, estragon__on_connect);
