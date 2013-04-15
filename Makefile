@@ -1,7 +1,7 @@
 -include config.mk
 
 OBJS += src/estragon.o
-OBJS += src/options.o
+OBJS += src/connect.o
 
 CFLAGS=-g -Wall -Ideps/libuv/include -Ideps/saneopt/include -Iinclude
 CFLAGS += -DESTRAGON_VERSION_HASH='"$(ESTRAGON_VERSION_HASH)"'
