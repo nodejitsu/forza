@@ -20,12 +20,26 @@ plugins = unique(args.with_plugin or ['heartbeat'])
 
 print 'Building `estragon` with plugins: ' + ', '.join(plugins)
 
+plugins_h = ''
+plugins_h += '#ifndef _PLUGINS_H\n'
+plugins_h += '#define _PLUGINS_H\n'
+plugins_h += '#include <estragon.h>\n'
+plugins_h += '#define PLUGIN_COUNT ' + str(len(plugins)) + '\n'
+
 for plugin in plugins:
     config += 'OBJS += src/plugins/' + plugin + '.o\n'
-    config += 'PLUGIN_INIT_CALLS += ' + plugin + '_init();\n'
+    plugins_h += '#include "../../src/plugins/' + plugin + '.h"\n'
 
 config += 'ESTRAGON_VERSION_HASH = ' + version
 
+plugins_h += 'int (*_plugin_init_calls[PLUGIN_COUNT])(estragon_plugin_t* plugin) = { '
+plugins_h += ', '.join(plugin + '_init' for plugin in plugins) + ' };\n'
+plugins_h += '#endif\n'
+
 f = open('config.mk', 'w')
 f.write(config + '\n')
+f.close()
+
+f = open('include/estragon-private/plugins.h', 'w')
+f.write(plugins_h)
 f.close()

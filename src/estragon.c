@@ -4,13 +4,10 @@
 #include <unistd.h>
 #include "../deps/libuv/include/uv.h"
 
-#include "../deps/saneopt/include/saneopt.h"
+#include <saneopt.h>
 
-#ifndef PLUGIN_INIT_CALLS
-  #define PLUGIN_INIT_CALLS
-#endif
-
-#define INITIALIZE_PLUGINS() do { PLUGIN_INIT_CALLS } while(0)
+#include <estragon.h>
+#include <estragon-private/plugins.h>
 
 static uv_loop_t *loop;
 static uv_connect_t connect_req;
@@ -72,8 +69,6 @@ void on_connect(uv_connect_t *req, int status) {
 #endif
 
   /* Setup timers for heartbeat and resource reporting */
-
-  INITIALIZE_PLUGINS();
 }
 
 int main(int argc, char *argv[]) {
