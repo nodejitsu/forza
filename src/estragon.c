@@ -14,6 +14,8 @@ static uv_connect_t connect_req;
 static uv_tcp_t client;
 static char hostname[512];
 
+estragon_plugin_t plugins[PLUGIN_COUNT];
+
 char* make_json(char *name, char *state, double value) {
   char *json_buf;
   /* We PROBABLY won't ever need to send more than 1kb of JSON at one time. */
@@ -60,6 +62,7 @@ void send_data(char *name, char *state, double value) {
 
 
 void on_connect(uv_connect_t *req, int status) {
+  int i;
   if (status) {
     fprintf(stderr, "on_connect: %s\n", uv_strerror(uv_last_error(loop)));
     return;
@@ -68,7 +71,11 @@ void on_connect(uv_connect_t *req, int status) {
   printf("Successfully connected!\n");
 #endif
 
-  /* Setup timers for heartbeat and resource reporting */
+  for (i = 0; i < PLUGIN_COUNT; i++) {
+    if (_plugin_init_calls[i](&plugins[i]) != 0) {
+      fprintf(stderr, "error initializing plugin %i\n", i);
+    }
+  }
 }
 
 int main(int argc, char *argv[]) {
