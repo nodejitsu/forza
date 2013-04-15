@@ -30,6 +30,8 @@ void on_connect(int status) {
 }
 
 int main(int argc, char *argv[]) {
+  loop = uv_default_loop();
+
   printf("estragon "ESTRAGON_VERSION_HASH"\n");
 
   saneopt_t* opt = saneopt_init(argc, argv);
