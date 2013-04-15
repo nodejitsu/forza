@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "../deps/libuv/include/uv.h"
 
+#include <uv.h>
 #include <saneopt.h>
 
 #include <estragon.h>
