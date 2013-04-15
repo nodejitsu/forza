@@ -35,6 +35,8 @@ int main(int argc, char *argv[]) {
   printf("estragon "ESTRAGON_VERSION_HASH"\n");
 
   saneopt_t* opt = saneopt_init(argc, argv);
+  saneopt_alias(opt, "port", "p");
+  saneopt_alias(opt, "host", "h");
   int port = atoi(saneopt_get(opt, "port"));
   char* host = saneopt_get(opt, "host");
 
