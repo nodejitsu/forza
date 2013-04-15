@@ -1,4 +1,4 @@
-#include "../../deps/libuv/include/uv.h"
+#include <uv.h>
 
 #ifdef __sun
 #include <sys/pset.h>
