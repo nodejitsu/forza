@@ -68,10 +68,10 @@ char* estragon__make_json(char* service, char* state, char* description, double 
       "\"service\":\"%s\","
       "\"state\":\"%s\","
       "\"description\":\"%s\","
-      "\"time\":\"%llu\","
+      "\"time\":%li,"
       "\"metric\":\"%f\","
       "\"ttl\":\"15\""
-      "}\n", hostname, service, state, description, uv_hrtime(), value);
+      "}\n", hostname, service, state, description, time(NULL), value);
 
   free(service);
   free(state);
