@@ -16,6 +16,6 @@ struct estragon_plugin {
 } typedef estragon_plugin_t;
 
 void estragon_connect(char* host, int port, estragon_connect_cb connect_cb_);
-void estragon_send(char* name, char* state, double value);
+void estragon_send(char* service, char* state, char* description, double value);
 
 #endif

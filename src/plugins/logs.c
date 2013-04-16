@@ -16,7 +16,7 @@ void on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, const char* type) 
   char* str = malloc((nread + 1) * sizeof(char));
   memcpy(str, rdbuf.base, nread);
   str[nread] = '\0';
-  estragon_send(type, str, 1.0);
+  estragon_send(type, type, str, 1.0);
   free(str);
 }
 
