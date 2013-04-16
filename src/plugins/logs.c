@@ -29,8 +29,8 @@ void on_stderr_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
 }
 
 void process_spawned_cb(uv_process_t* process, uv_process_options_t* options) {
-  uv_read_start(options->stdio[0].data.stream, on_alloc, on_stdout_read);
-  uv_read_start(options->stdio[1].data.stream, on_alloc, on_stderr_read);
+  uv_read_start(options->stdio[1].data.stream, on_alloc, on_stdout_read);
+  uv_read_start(options->stdio[2].data.stream, on_alloc, on_stderr_read);
 }
 
 int logs_init(estragon_plugin_t* plugin) {

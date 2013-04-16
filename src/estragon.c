@@ -46,12 +46,12 @@ void spawn() {
   // FD 3 is a pipe used for IPC.
   //
   options.stdio_count = 4;
-  stdio[0].flags = UV_CREATE_PIPE | UV_WRITABLE_PIPE;
-  stdio[0].data.stream = (uv_stream_t*) &child_stdout;
+  stdio[0].flags = UV_INHERIT_FD;
+  stdio[0].data.fd = 0;
   stdio[1].flags = UV_CREATE_PIPE | UV_WRITABLE_PIPE;
-  stdio[1].data.stream = (uv_stream_t*) &child_stderr;
-  stdio[2].flags = UV_INHERIT_FD;
-  stdio[2].data.fd = i;
+  stdio[1].data.stream = (uv_stream_t*) &child_stdout;
+  stdio[2].flags = UV_CREATE_PIPE | UV_WRITABLE_PIPE;
+  stdio[2].data.stream = (uv_stream_t*) &child_stderr;
   stdio[3].flags = UV_CREATE_PIPE | UV_WRITABLE_PIPE;
   stdio[3].data.stream = (uv_stream_t*) &child_ipc;
 
