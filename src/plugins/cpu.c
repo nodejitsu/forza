@@ -1,4 +1,5 @@
 #include <uv.h>
+#include <estragon.h>
 
 #ifdef __sun
 #include <sys/pset.h>
