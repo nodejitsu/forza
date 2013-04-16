@@ -22,7 +22,7 @@ endif
 
 all: libuv libsaneopt libenv estragon
 
-src/%.o: src/%.c
+src/%.o: src/%.c include/estragon-private/plugins.h
 	gcc $(CFLAGS) -c $< -o $@
 
 src/plugins/%.o: src/plugins/%.c
