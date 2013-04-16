@@ -4,12 +4,14 @@
 #include <unistd.h>
 
 #include <uv.h>
+#include <env.h>
 #include <saneopt.h>
 
 #include <estragon.h>
 #include <estragon-private/plugins.h>
 
 static uv_loop_t *loop;
+extern char** environ;
 
 estragon_plugin_t plugins[PLUGIN_COUNT];
 char** arguments;
@@ -19,6 +21,10 @@ void on_exit(uv_process_t* process, int exit_status, int term_signal) {
 
 void spawn() {
   int i;
+  char** env = NULL;
+
+  env = env_copy(environ, env);
+
   uv_process_t* process = malloc(sizeof(uv_process_t));
   uv_stdio_container_t stdio[3];
   uv_process_options_t options;
@@ -29,7 +35,7 @@ void spawn() {
     stdio[i].data.fd = i;
   }
 
-  options.env = NULL; // TODO: use env here
+  options.env = env;
   options.cwd = NULL;
   options.file = arguments[0];
   options.args = arguments;
