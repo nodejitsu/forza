@@ -3,7 +3,7 @@
 OBJS += src/estragon.o
 OBJS += src/connect.o
 
-CFLAGS=-g -Wall -Ideps/libuv/include -Ideps/saneopt/include -Iinclude
+CFLAGS=-g -Wall -Ideps/libuv/include -Ideps/saneopt/include -Ideps/env/include -Iinclude
 CFLAGS += -DESTRAGON_VERSION_HASH='"$(ESTRAGON_VERSION_HASH)"'
 
 uname_S=$(shell uname -s)
