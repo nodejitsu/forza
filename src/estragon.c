@@ -63,6 +63,12 @@ void spawn() {
   options.stdio = stdio;
   options.exit_cb = on_exit;
 
+  for (i = 0; i < PLUGIN_COUNT; i++) {
+    if (plugins[i].process_options_cb) {
+      plugins[i].process_options_cb(&options);
+    }
+  }
+
   if (uv_spawn(loop, process, options)) {
     fprintf(stderr, "uv_spawn: %s\n", uv_err_name(uv_last_error(loop)));
   }
