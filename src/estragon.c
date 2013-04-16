@@ -23,7 +23,7 @@ static uv_pipe_t child_stdout;
 static uv_pipe_t child_stderr;
 static uv_pipe_t child_ipc;
 
-void on_exit(uv_process_t* process, int exit_status, int term_signal) {
+void on_process_exit(uv_process_t* process, int exit_status, int term_signal) {
 }
 
 void spawn() {
@@ -61,7 +61,7 @@ void spawn() {
   options.args = arguments;
   options.flags = 0;
   options.stdio = stdio;
-  options.exit_cb = on_exit;
+  options.exit_cb = on_process_exit;
 
   for (i = 0; i < PLUGIN_COUNT; i++) {
     if (plugins[i].process_options_cb) {
