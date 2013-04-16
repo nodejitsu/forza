@@ -4,7 +4,7 @@
 #include <uv.h>
 
 typedef void (*estragon_process_exit_cb)(int exit_status, int term_signal);
-typedef void (*estragon_process_options_cb)(uv_process_options_t);
+typedef void (*estragon_process_options_cb)(uv_process_options_t* options);
 typedef void (*estragon_connect_cb)(int status);
 
 struct estragon_plugin {
