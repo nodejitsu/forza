@@ -16,6 +16,13 @@ extern char** environ;
 estragon_plugin_t plugins[PLUGIN_COUNT];
 char** arguments;
 
+//
+// Pipes for child process I/O.
+//
+static uv_pipe_t child_stdout;
+static uv_pipe_t child_stderr;
+static uv_pipe_t child_ipc;
+
 void on_exit(uv_process_t* process, int exit_status, int term_signal) {
 }
 
@@ -26,14 +33,27 @@ void spawn() {
   env = env_copy(environ, env);
 
   uv_process_t* process = malloc(sizeof(uv_process_t));
-  uv_stdio_container_t stdio[3];
+  uv_stdio_container_t stdio[4];
   uv_process_options_t options;
 
-  options.stdio_count = 3;
-  for (i = 0; i < options.stdio_count; i++) {
-    stdio[i].flags = UV_INHERIT_FD;
-    stdio[i].data.fd = i;
-  }
+  uv_pipe_init(loop, &child_stdout, 0);
+  uv_pipe_init(loop, &child_stderr, 0);
+  uv_pipe_init(loop, &child_ipc, 0);
+
+  //
+  // Setup child's stdio. stdout and stderr are pipes so that we can read
+  // child process' output.
+  // FD 3 is a pipe used for IPC.
+  //
+  options.stdio_count = 4;
+  stdio[0].flags = UV_CREATE_PIPE | UV_WRITABLE_PIPE;
+  stdio[0].data.stream = (uv_stream_t*) &child_stdout;
+  stdio[1].flags = UV_CREATE_PIPE | UV_WRITABLE_PIPE;
+  stdio[1].data.stream = (uv_stream_t*) &child_stderr;
+  stdio[2].flags = UV_INHERIT_FD;
+  stdio[2].data.fd = i;
+  stdio[3].flags = UV_CREATE_PIPE | UV_WRITABLE_PIPE;
+  stdio[3].data.stream = (uv_stream_t*) &child_ipc;
 
   options.env = env;
   options.cwd = NULL;
