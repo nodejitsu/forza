@@ -20,9 +20,9 @@ void send_cpu_usage(uv_timer_t *timer, int status) {
 #else
   uv_loadavg(loadinfo);
 #endif
-  estragon_send("CPU load, last minute", "info", loadinfo[0]);
-  estragon_send("CPU load, last 5 minutes", "info", loadinfo[1]);
-  estragon_send("CPU load, last 15 minutes", "info", loadinfo[2]);
+  estragon_send("cpu", "info", "CPU load, last minute", loadinfo[0]);
+  estragon_send("cpu", "info", "CPU load, last 5 minutes", loadinfo[1]);
+  estragon_send("cpu", "info", "CPU load, last 15 minutes", loadinfo[2]);
 }
 
 int cpu_init() {
