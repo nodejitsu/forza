@@ -20,7 +20,7 @@ ifeq (SunOS, $(uname_S))
   LDFLAGS=-lsendfile -lsocket -lkstat -lnsl -lm
 endif
 
-all: libuv libsaneopt libenv estragon
+all: libuv libsaneopt libenv libinterposed estragon
 
 src/%.o: src/%.c include/estragon-private/plugins.h
 	gcc $(CFLAGS) -c $< -o $@
@@ -39,6 +39,14 @@ libsaneopt:
 
 libenv:
 	make -C deps/env/
+
+ifeq (Darwin, $(uname_S))
+libinterposed: src/plugins/port/libinterposed.c
+	gcc -dynamiclib -o libinterposed.dylib src/plugins/port/libinterposed.c
+else
+libinterposed: src/plugins/port/libinterposed.c
+	gcc $(CFLAGS) -fPIC -shared -o libinterposed.so src/plugins/port/libinterposed.c
+endif
 
 clean:
 	rm -f estragon
