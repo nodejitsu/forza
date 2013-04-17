@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <uv.h>
 #include <estragon.h>
 
@@ -17,7 +18,9 @@ void on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, const char* type) 
   memcpy(str, rdbuf.base, nread);
   str[nread] = '\0';
   estragon_send(type, type, str, 1.0);
+
   free(str);
+  free(rdbuf.base);
 }
 
 void on_stdout_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
