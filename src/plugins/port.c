@@ -15,16 +15,20 @@ static uv_buf_t port__on_alloc(uv_handle_t* handle, size_t suggested_size) {
 }
 
 void port__on_ipc_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+  int port;
+  char* str;
+  char msg[8];
+
   if (nread == -1) {
-    printf("ipc: eof\n");
     return;
   }
 
-  char* str = malloc((nread + 1) * sizeof(char));
+  str = malloc((nread + 1) * sizeof(char));
+
   memcpy(str, rdbuf.base, nread);
-  printf("ipc: %s\n", str);
-  if (strncmp(str, "port=", 5) == 0) {
-    estragon_send("port", "port", str, 1.0);
+  if (sscanf(str, "port=%d\n", &port) == 1) {
+    sprintf(msg, "%d", port);
+    estragon_send("port", "info", msg, 1.0);
   }
 
   free(str);
@@ -36,8 +40,6 @@ void port__process_spawned_cb(uv_process_t* process, uv_process_options_t* optio
 }
 
 void port__process_options_cb(uv_process_options_t* options) {
-  options->env = env_set(options->env, "DYLD_FORCE_FLAT_NAMESPACE", "1");
-  options->env = env_set(options->env, "DYLD_INSERT_LIBRARIES", lib_path);
 #if (__APPLE__ && __MACH__)
   options->env = env_set(options->env, "DYLD_FORCE_FLAT_NAMESPACE", "1");
   options->env = env_set(options->env, "DYLD_INSERT_LIBRARIES", lib_path);
