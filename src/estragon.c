@@ -24,6 +24,16 @@ static uv_pipe_t child_stderr;
 static uv_pipe_t child_ipc;
 
 void on_process_exit(uv_process_t* process, int exit_status, int term_signal) {
+  int i;
+
+  for (i = 0; i < PLUGIN_COUNT; i++) {
+    if (plugins[i].process_exit_cb) {
+      plugins[i].process_exit_cb(exit_status, term_signal);
+    }
+  }
+
+  estragon_close();
+  uv_close((uv_handle_t*) process, NULL);
 }
 
 void spawn() {

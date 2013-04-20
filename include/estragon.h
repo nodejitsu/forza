@@ -17,5 +17,6 @@ struct estragon_plugin {
 
 void estragon_connect(char* host, int port, estragon_connect_cb connect_cb_);
 void estragon_send(char* service, char* state, char* description, double value);
+void estragon_close();
 
 #endif

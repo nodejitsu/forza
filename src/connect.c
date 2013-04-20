@@ -107,3 +107,6 @@ void estragon_send(char* service, char* state, char* description, double value) 
   free(json_data);
 }
 
+void estragon_close() {
+  uv_close((uv_handle_t*) &client, NULL);
+}
