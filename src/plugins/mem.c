@@ -1,4 +1,5 @@
-#include "../../deps/libuv/include/uv.h"
+#include <uv.h>
+#include <estragon.h>
 
 static uv_timer_t mem_timer;
 
@@ -11,7 +12,7 @@ void send_mem_usage(uv_timer_t *timer, int status) {
   printf("memory usage timer fired, status %d\n", status);
 #endif
   mempct = (double)(totalmem - freemem) / (double)totalmem;
-  send_data("Memory Usage (%)", "info", mempct);
+  estragon_send("mem", "info", "Memory Usage (%)", mempct);
 }
 
 int mem_init() {
