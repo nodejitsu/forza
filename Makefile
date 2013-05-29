@@ -20,13 +20,15 @@ ifeq (SunOS, $(uname_S))
   LDFLAGS=-lsendfile -lsocket -lkstat -lnsl -lm
 endif
 
-all: libuv libsaneopt libenv libinterposed estragon
+all: libuv libsaneopt libenv estragon
 
 src/%.o: src/%.c include/estragon-private/plugins.h
 	gcc $(CFLAGS) -c $< -o $@
 
 src/plugins/%.o: src/plugins/%.c
 	gcc $(CFLAGS) -c $< -o $@
+
+src/plugins/port.o: libinterposed src/plugins/port.c
 
 estragon: $(OBJS)
 	gcc $(LDFLAGS) deps/libuv/libuv.a deps/saneopt/libsaneopt.a deps/env/libenv.a $^ -o $@
