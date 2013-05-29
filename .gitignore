@@ -3,3 +3,5 @@ estragon
 *.sw[op]
 config.mk
 include/estragon-private/plugins.h
+libinterposed.*
+node_modules
