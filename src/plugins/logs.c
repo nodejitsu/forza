@@ -7,6 +7,9 @@ static uv_buf_t on_alloc(uv_handle_t* handle, size_t suggested_size) {
 }
 
 void on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, const char* type) {
+  char* str;
+  estragon_metric_t* metric;
+
   if (nread == -1) {
     //
     // EOF. We should probably notify logging server, but ignore for now.
@@ -14,10 +17,17 @@ void on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, const char* type) 
     return;
   }
 
-  char* str = malloc((nread + 1) * sizeof(char));
+  metric = estragon_new_metric();
+
+  str = malloc((nread + 1) * sizeof(char));
   memcpy(str, rdbuf.base, nread);
   str[nread] = '\0';
-  estragon_send(type, type, str, 1.0);
+
+  metric->metric = 1.0;
+  metric->description = str;
+  metric->service = (type == "stdout") ? "logs/stdout" : "logs/stderr";
+
+  estragon_send(metric);
 
   free(str);
   free(rdbuf.base);

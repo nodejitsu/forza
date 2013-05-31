@@ -21,7 +21,6 @@ char* estragon__json_escape(char* string) {
     switch (*string) {
       case '\\': strcat(result, "\\\\"); break;
       case '"':  strcat(result, "\\\""); break;
-      case '/':  strcat(result, "\\/");  break;
       case '\b': strcat(result, "\\b");  break;
       case '\f': strcat(result, "\\f"); break;
       case '\n': strcat(result, "\\n"); break;
@@ -54,30 +53,68 @@ void estragon_connect(char* host, int port, estragon_connect_cb connect_cb_) {
   uv_tcp_connect(&connect_req, &client, addr, estragon__on_connect);
 }
 
-char* estragon__make_json(char* service, char* state, char* description, double value) {
-  char* json_buf = malloc(sizeof(char) * 1024);
-  /* We PROBABLY won't ever need to send more than 1kb of JSON at one time. */
-  /* TODO: Revisit this decision. */
-  service = estragon__json_escape(service);
-  state = estragon__json_escape(state);
-  description = estragon__json_escape(description);
+void estragon__json_append(char** string, const char* property, char* value, int prepend_comma) {
+  // This is going to leak *so* bad.
+  int property_length = strlen(property);
+  int value_length = strlen(value);
 
-  snprintf(json_buf, 1024,
-      "{"
-      "\"host\":\"%s\","
-      "\"service\":\"%s\","
-      "\"state\":\"%s\","
-      "\"description\":\"%s\","
-      "\"time\":%li,"
-      "\"metric\":\"%f\","
-      "\"ttl\":\"15\""
-      "}\n", hostname, service, state, description, time(NULL), value);
+  *string = realloc(*string, strlen(*string) + property_length + value_length + 4 + prepend_comma);
 
-  free(service);
-  free(state);
-  free(description);
+  if (prepend_comma) {
+    strncat(*string, ",", 1);
+  }
+  strncat(*string, "\"", 1);
+  strncat(*string, property, property_length);
+  strncat(*string, "\":", 2);
+  strncat(*string, value, value_length);
+}
 
-  return json_buf;
+char* estragon__json_stringify_string(char* string) {
+  char* escaped = estragon__json_escape(string);
+  size_t length = strlen(escaped);
+  char* out = malloc(length + 3);
+
+  if (out == NULL) {
+    return NULL;
+  }
+
+  out[0] = '\0';
+
+  strncat(out, "\"", 1);
+  strncat(out, escaped, length);
+  strncat(out, "\"", 1);
+
+  free(escaped);
+
+  return out;
+}
+
+char* estragon__json_stringify(estragon_metric_t* metric) {
+  char* json = malloc(1);
+  char buf[128];
+  char* str_buf;
+
+  json[0] = '{';
+
+  snprintf(buf, sizeof(buf), "%.8f", metric->metric);
+  estragon__json_append(&json, "metric", buf, 0);
+
+  if (metric->description) {
+    str_buf = estragon__json_stringify_string(metric->description);
+    estragon__json_append(&json, "description", str_buf, 1);
+    free(str_buf);
+  }
+
+  if (metric->description) {
+    str_buf = estragon__json_stringify_string(metric->service);
+    estragon__json_append(&json, "service", str_buf, 1);
+    free(str_buf);
+  }
+
+  json = realloc(json, strlen(json) + 3);
+  strncat(json, "}\n", 2);
+
+  return json;
 }
 
 void estragon__after_write(uv_write_t* req, int status) {
@@ -87,12 +124,35 @@ void estragon__after_write(uv_write_t* req, int status) {
   free(req);
 }
 
-void estragon_send(char* service, char* state, char* description, double value) {
+estragon_metric_t* estragon_new_metric() {
+  estragon_metric_t* metric = malloc(sizeof(estragon_metric_t));
+  if (metric == NULL) {
+    return NULL;
+  }
+
+  metric->meta = malloc(sizeof(estragon_metric_meta_t));
+  if (metric->meta == NULL) {
+    free(metric);
+    return NULL;
+  }
+
+  metric->service = NULL;
+  metric->description = NULL;
+
+  return metric;
+}
+
+void estragon_free_metric(estragon_metric_t* metric) {
+  free(metric->meta);
+  free(metric);
+}
+
+void estragon_send(estragon_metric_t* metric) {
   int r;
   uv_buf_t send_buf;
   uv_stream_t *stream;
   uv_write_t *write_req;
-  char *json_data = estragon__make_json(service, state, description, value);
+  char *json_data = estragon__json_stringify(metric);
 
   write_req = malloc(sizeof *write_req);
   send_buf = uv_buf_init(json_data, sizeof(char) * strlen(json_data));
