@@ -105,7 +105,7 @@ char* estragon__json_stringify(estragon_metric_t* metric) {
     free(str_buf);
   }
 
-  if (metric->description) {
+  if (metric->service) {
     str_buf = estragon__json_stringify_string(metric->service);
     estragon__json_append(&json, "service", str_buf, 1);
     free(str_buf);
