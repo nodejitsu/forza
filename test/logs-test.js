@@ -15,12 +15,14 @@ var server = net.createServer(cb(function (socket) {
   });
 
   socket.on('end', function () {
-    data = data.split('\n').filter(Boolean).map(JSON.parse);
+    data = data.split('\n').filter(Boolean).map(JSON.parse).filter(function (d) {
+      return d && d.service.indexOf('logs/') === 0;
+    });
 
-    assert.equal(data[0].service, 'stdout');
+    assert.equal(data[0].service, 'logs/stdout');
     assert.equal(data[0].description, 'Hello, stdout!\n');
 
-    assert.equal(data[1].service, 'stderr');
+    assert.equal(data[1].service, 'logs/stderr');
     assert.equal(data[1].description, 'Hello, stderr!\n');
 
     server.close();
