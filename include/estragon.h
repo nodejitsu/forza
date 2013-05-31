@@ -15,8 +15,23 @@ struct estragon_plugin {
   estragon_process_spawned_cb process_spawned_cb;
 } typedef estragon_plugin_t;
 
+struct estragon_metric_meta {
+  int pid;
+  long long uptime;
+} typedef estragon_metric_meta_t;
+
+struct estragon_metric {
+  double metric;
+  int ttl;
+  char* service;
+  char* description;
+  estragon_metric_meta_t* meta;
+} typedef estragon_metric_t;
+
 void estragon_connect(char* host, int port, estragon_connect_cb connect_cb_);
-void estragon_send(char* service, char* state, char* description, double value);
+void estragon_send(estragon_metric_t* metric);
 void estragon_close();
+estragon_metric_t* estragon_new_metric();
+void estragon_free_metric(estragon_metric_t* metric);
 
 #endif
