@@ -2,6 +2,7 @@
 
 OBJS += src/estragon.o
 OBJS += src/connect.o
+OBJS += src/json.o
 
 CFLAGS=-g -Wall -Ideps/libuv/include -Ideps/saneopt/include -Ideps/env/include -Iinclude
 CFLAGS += -DESTRAGON_VERSION_HASH='"$(ESTRAGON_VERSION_HASH)"'

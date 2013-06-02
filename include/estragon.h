@@ -33,5 +33,6 @@ void estragon_send(estragon_metric_t* metric);
 void estragon_close();
 estragon_metric_t* estragon_new_metric();
 void estragon_free_metric(estragon_metric_t* metric);
+char* estragon_json_stringify(estragon_metric_t* metric);
 
 #endif
