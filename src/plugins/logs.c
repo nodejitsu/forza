@@ -29,6 +29,7 @@ void on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, const char* type) 
 
   estragon_send(metric);
 
+  estragon_free_metric(metric);
   free(str);
   free(rdbuf.base);
 }
