@@ -59,3 +59,8 @@ cleanall:
 	make clean -C deps/libuv/
 	make clean -C deps/saneopt/
 	make clean -C deps/env/
+
+test:
+	test/run
+
+.PHONY: all test clean cleanall
