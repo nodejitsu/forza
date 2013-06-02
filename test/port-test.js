@@ -14,6 +14,10 @@ var server = net.createServer(cb(function (socket) {
 
     // FIXME assumes that one message comes in one chunk but 4 AM
     var chunk = socket.read();
+    if (!chunk) {
+      return;
+    }
+
     chunk = JSON.parse(chunk);
 
     if (chunk.service === 'port') {
@@ -25,7 +29,11 @@ var server = net.createServer(cb(function (socket) {
         console.log('connected to client');
 
         clientSocket.on('readable', cb(function () {
-          data += clientSocket.read();
+          var chunk = clientSocket.read();
+          if (!chunk) {
+            return;
+          }
+          data += chunk;
         }));
 
         clientSocket.on('end', cb(function () {
