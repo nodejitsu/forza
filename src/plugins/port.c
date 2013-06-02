@@ -18,6 +18,7 @@ void port__on_ipc_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
   int port;
   char* str;
   char msg[8];
+  estragon_metric_t* metric;
 
   if (nread == -1) {
     return;
@@ -28,7 +29,15 @@ void port__on_ipc_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
   memcpy(str, rdbuf.base, nread);
   if (sscanf(str, "port=%d\n", &port) == 1) {
     sprintf(msg, "%d", port);
-    estragon_send("port", "info", msg, 1.0);
+
+    metric = estragon_new_metric();
+    metric->metric = 1.0;
+    metric->description = msg;
+    metric->service = "port";
+
+    estragon_send(metric);
+
+    estragon_free_metric(metric);
   }
 
   free(str);
