@@ -19,11 +19,16 @@ var server = net.createServer(cb(function (socket) {
       return d && d.service.indexOf('logs/') === 0;
     });
 
-    assert.equal(data[0].service, 'logs/stdout');
-    assert.equal(data[0].description, 'Hello, stdout!\n');
-
-    assert.equal(data[1].service, 'logs/stderr');
-    assert.equal(data[1].description, 'Hello, stderr!\n');
+    var service = { 'logs/stdout': 0, 'logs/stderr': 0 };
+    data.forEach(function (d) {
+      service[d.service] += d.description.split('\n').filter(Boolean).length
+      assert(d.description.match(d.service === 'logs/stdout'
+        ? /Hello, stdout!\n/
+        : /Hello, stderr!\n/
+      ))
+    });
+    assert.equal(service['logs/stdout'], 1024);
+    assert.equal(service['logs/stderr'], 1024);
 
     server.close();
   });
