@@ -75,6 +75,10 @@ char* estragon_json_stringify(estragon_metric_t* metric) {
 
   estragon__json_append(&json, "metric", buf, 0);
 
+  str_buf = estragon__json_stringify_string(metric->host);
+  estragon__json_append(&json, "host", str_buf, 1);
+  free(str_buf);
+
   if (metric->description) {
     str_buf = estragon__json_stringify_string(metric->description);
     estragon__json_append(&json, "description", str_buf, 1);

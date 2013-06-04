@@ -67,12 +67,13 @@ void estragon_send(estragon_metric_t* metric) {
   uv_buf_t send_buf;
   uv_stream_t *stream;
   uv_write_t *write_req;
-  char *json_data = estragon_json_stringify(metric);
+  char *json_data;
+
+  metric->host = hostname;
+  json_data = estragon_json_stringify(metric);
 
   write_req = malloc(sizeof *write_req);
-
   send_buf = uv_buf_init(json_data, sizeof(char) * strlen(json_data));
-
   stream = connect_req.handle;
 
   r = uv_write(write_req, stream, &send_buf, 1, estragon__after_write);
