@@ -65,7 +65,8 @@ void estragon_connect(char** hosts_, estragon_connect_cb connect_cb) {
 
 void estragon__on_write(uv_write_t* req, int status) {
   if (status) {
-    fprintf(stderr, "uv_write error: %s\n", uv_strerror(uv_last_error(loop)));
+    fprintf(stderr, "write error: %s\n", uv_strerror(uv_last_error(loop)));
+    estragon__reconnect(NULL);
   }
   free(req);
 }
