@@ -24,11 +24,12 @@ struct estragon_metric {
   double metric;
   int ttl;
   char* service;
+  char* host;
   char* description;
   estragon_metric_meta_t* meta;
 } typedef estragon_metric_t;
 
-void estragon_connect(char* host, int port, estragon_connect_cb connect_cb_);
+void estragon_connect(char** hosts, estragon_connect_cb connect_cb_);
 void estragon_send(estragon_metric_t* metric);
 void estragon_close();
 estragon_metric_t* estragon_new_metric();

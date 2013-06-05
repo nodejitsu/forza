@@ -11,28 +11,58 @@ char hostname[512];
 uv_tcp_t client;
 uv_loop_t* loop;
 static uv_connect_t connect_req;
-estragon_connect_cb connect_cb;
+
+int host_index = -1;
+char** hosts;
 
 void estragon__on_connect(uv_connect_t* req, int status) {
-  connect_cb(status);
+  if (req->data != NULL) {
+    ((estragon_connect_cb) req->data)(status);
+  }
 }
 
-void estragon_connect(char* host, int port, estragon_connect_cb connect_cb_) {
-  struct sockaddr_in addr = uv_ip4_addr(host, port);
+void estragon__reconnect(estragon_connect_cb connect_cb) {
+  char* pair;
+  char* port_sep;
+  char host[16];
+  int port;
+  struct sockaddr_in addr;
+
+  ++host_index;
+  pair = hosts[host_index];
+  if (host == NULL) {
+    host_index = 0;
+    pair = hosts[host_index];
+  }
+
+  port_sep = strchr(pair, ':');
+  strncpy(host, pair, port_sep - pair);
+  sscanf(port_sep + 1, "%d", &port);
+
+  printf("connecting to %s:%d...\n", host, port);
+
+  addr = uv_ip4_addr(host, port);
 
   loop = uv_default_loop();
 
-  /* Get the hostname so that it can be provided to the server */
-  gethostname(hostname, sizeof(hostname));
+  connect_req.data = (void*) connect_cb;
 
-  connect_cb = connect_cb_;
   /* Set up a TCP keepalive connection to the godot server */
   uv_tcp_init(loop, &client);
   uv_tcp_keepalive(&client, 1, 180);
   uv_tcp_connect(&connect_req, &client, addr, estragon__on_connect);
 }
 
-void estragon__after_write(uv_write_t* req, int status) {
+void estragon_connect(char** hosts_, estragon_connect_cb connect_cb) {
+  /* Get the hostname so that it can be provided to the server */
+  gethostname(hostname, sizeof(hostname));
+
+  hosts = hosts_;
+
+  estragon__reconnect(connect_cb);
+}
+
+void estragon__on_write(uv_write_t* req, int status) {
   if (status) {
     fprintf(stderr, "uv_write error: %s\n", uv_strerror(uv_last_error(loop)));
   }
@@ -76,7 +106,7 @@ void estragon_send(estragon_metric_t* metric) {
   send_buf = uv_buf_init(json_data, sizeof(char) * strlen(json_data));
   stream = connect_req.handle;
 
-  r = uv_write(write_req, stream, &send_buf, 1, estragon__after_write);
+  r = uv_write(write_req, stream, &send_buf, 1, estragon__on_write);
   if (r) {
     fprintf(stderr, "uv_write: %s\n", uv_strerror(uv_last_error(loop)));
     return;
