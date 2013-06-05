@@ -27,6 +27,7 @@ server.listen(PORT, function () {
   var child = spawn(
     path.join(__dirname, '..', 'estragon'),
     [
+      '-h', '127.0.0.1:' + (PORT - 2).toString(),
       '-h', '127.0.0.1:' + (PORT - 1).toString(),
       '-h', '127.0.0.1:' + PORT.toString(),
       '--', 'node', path.join(__dirname, 'fixtures', 'exit-after-1-s.js')
