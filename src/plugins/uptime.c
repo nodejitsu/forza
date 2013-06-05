@@ -16,7 +16,11 @@ void uptime__send_uptime(uv_timer_t *timer, int status) {
   estragon_free_metric(metric);
 }
 
-int uptime_init() {
+void uptime__process_exit_cb(int exit_status, int term_singal) {
+  uv_timer_stop(&uptime_timer);
+}
+
+int uptime_init(estragon_plugin_t* plugin) {
   start_time = time(NULL);
 
   //
@@ -25,6 +29,8 @@ int uptime_init() {
   if (start_time == -1) {
     return -1;
   }
+
+  plugin->process_exit_cb = uptime__process_exit_cb;
 
   uv_timer_init(uv_default_loop(), &uptime_timer);
   uv_timer_start(&uptime_timer, uptime__send_uptime, 0, 5000);
