@@ -37,6 +37,7 @@ void estragon__reconnect(estragon_connect_cb connect_cb) {
 
   port_sep = strchr(pair, ':');
   strncpy(host, pair, port_sep - pair);
+  host[port_sep - pair] = '\0';
   sscanf(port_sep + 1, "%d", &port);
 
   printf("connecting to %s:%d...\n", host, port);
