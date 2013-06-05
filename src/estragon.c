@@ -113,6 +113,9 @@ void on_connect(int status) {
 }
 
 int main(int argc, char *argv[]) {
+  int port;
+  char* host;
+
   loop = uv_default_loop();
 
   printf("estragon "ESTRAGON_VERSION_HASH"\n");
@@ -120,13 +123,16 @@ int main(int argc, char *argv[]) {
   saneopt_t* opt = saneopt_init(argc - 1, argv + 1);
   saneopt_alias(opt, "port", "p");
   saneopt_alias(opt, "host", "h");
-  int port = atoi(saneopt_get(opt, "port"));
-  char* host = saneopt_get(opt, "host");
+  port = atoi(saneopt_get(opt, "port"));
+  host = saneopt_get(opt, "host");
   arguments = saneopt_arguments(opt);
 
   printf("connecting to %s:%d...\n", host, port);
   estragon_connect(host, port, on_connect);
 
   uv_run(loop, UV_RUN_DEFAULT);
+
+  free(host);
+
   return 0;
 }
