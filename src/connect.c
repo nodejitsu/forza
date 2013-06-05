@@ -15,11 +15,7 @@ static uv_connect_t connect_req;
 int host_index = -1;
 char** hosts;
 
-void estragon__on_connect(uv_connect_t* req, int status) {
-  if (req->data != NULL) {
-    ((estragon_connect_cb) req->data)(status);
-  }
-}
+void estragon__on_connect(uv_connect_t* req, int status);
 
 void estragon__reconnect(estragon_connect_cb connect_cb) {
   char* pair;
@@ -61,6 +57,18 @@ void estragon_connect(char** hosts_, estragon_connect_cb connect_cb) {
   hosts = hosts_;
 
   estragon__reconnect(connect_cb);
+}
+
+void estragon__on_connect(uv_connect_t* req, int status) {
+  if (status != 0) {
+    fprintf(stderr, "connect error: %s\n", uv_strerror(uv_last_error(loop)));
+    estragon__reconnect((estragon_connect_cb) req->data);
+    return;
+  }
+
+  if (req->data != NULL) {
+    ((estragon_connect_cb) req->data)(status);
+  }
 }
 
 void estragon__on_write(uv_write_t* req, int status) {
