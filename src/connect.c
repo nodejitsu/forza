@@ -7,13 +7,13 @@
 
 #include <estragon.h>
 
-char hostname[512];
-uv_tcp_t client;
-uv_loop_t* loop;
+static char hostname[512];
+static uv_tcp_t client;
+static uv_loop_t* loop;
 static uv_connect_t connect_req;
 
-int host_index = -1;
-char** hosts;
+static int host_index = -1;
+static char** hosts;
 
 void estragon__on_connect(uv_connect_t* req, int status);
 
