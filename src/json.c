@@ -7,6 +7,11 @@
 
 char* estragon__json_escape(char* string) {
   char* result = malloc((2 * strlen(string) + 1) * sizeof(char));
+
+  if (result == NULL) {
+    return NULL;
+  }
+
   result[0] = '\0';
 
   while (*string != '\0') {
@@ -44,10 +49,18 @@ void estragon__json_append(char** string, const char* property, char* value, int
 
 char* estragon__json_stringify_string(char* string) {
   char* escaped = estragon__json_escape(string);
-  size_t length = strlen(escaped);
-  char* out = malloc(length + 3);
+  char* out;
+  size_t length;
+
+  if (escaped == NULL) {
+    return NULL;
+  }
+
+  length = strlen(escaped);
+  out = malloc(length + 3);
 
   if (out == NULL) {
+    free(escaped);
     return NULL;
   }
 
