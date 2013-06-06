@@ -32,7 +32,7 @@ src/plugins/%.o: src/plugins/%.c
 src/plugins/port.o: libinterposed src/plugins/port.c
 
 estragon: $(OBJS)
-	gcc $(LDFLAGS) deps/libuv/libuv.a deps/saneopt/libsaneopt.a deps/env/libenv.a $^ -o $@
+	gcc $(LDFLAGS) $^ deps/libuv/libuv.a deps/saneopt/libsaneopt.a deps/env/libenv.a -o $@
 
 libuv:
 	make -C deps/libuv/
