@@ -2,25 +2,19 @@ var net = require('net'),
     path = require('path'),
     assert = require('assert'),
     spawn = require('child_process').spawn,
+    jsonStream = require('json-stream'),
     cb = require('assert-called');
 
 var PORT = 5433;
 
 var server = net.createServer(cb(function (socket) {
-  var data = '';
+  var stream = socket.pipe(jsonStream());
 
-  socket.on('readable', cb(function () {
-    var clientPort;
+  stream.on('readable', cb(function () {
+    var chunk = socket.read(),
+        clientPort;
 
-    // FIXME assumes that one message comes in one chunk but 4 AM
-    var chunk = socket.read();
-    if (!chunk) {
-      return;
-    }
-
-    chunk = JSON.parse(chunk);
-
-    if (chunk.service === 'port') {
+    if (chunk && chunk.service === 'port') {
       clientPort = parseInt(chunk.description, 10);
       console.log('client port', clientPort);
       clientSocket = net.connect(clientPort, cb(function () {
