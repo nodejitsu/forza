@@ -114,6 +114,7 @@ void on_connect(int status) {
 
 int main(int argc, char *argv[]) {
   char** hosts;
+  char* hostname;
 
   loop = uv_default_loop();
 
@@ -122,9 +123,15 @@ int main(int argc, char *argv[]) {
   saneopt_t* opt = saneopt_init(argc - 1, argv + 1);
   saneopt_alias(opt, "host", "h");
   hosts = saneopt_get_all(opt, "host");
+  hostname = saneopt_get(opt, "hostname");
   arguments = saneopt_arguments(opt);
 
-  estragon_connect(hosts, on_connect);
+  if (hostname == NULL) {
+    hostname = malloc(256 * sizeof(*hostname));
+    gethostname(hostname, 256);
+  }
+
+  estragon_connect(hosts, hostname, on_connect);
 
   uv_run(loop, UV_RUN_DEFAULT);
 

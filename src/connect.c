@@ -7,7 +7,7 @@
 
 #include <estragon.h>
 
-static char hostname[512];
+static char* hostname;
 static uv_tcp_t client;
 static uv_loop_t* loop;
 static uv_connect_t connect_req;
@@ -67,12 +67,10 @@ void estragon__reconnect(estragon_connect_cb connect_cb) {
   }
 }
 
-void estragon_connect(char** hosts_, estragon_connect_cb connect_cb) {
+void estragon_connect(char** hosts_, char* hostname_, estragon_connect_cb connect_cb) {
   /* Get the hostname so that it can be provided to the server */
-  gethostname(hostname, sizeof(hostname));
-
+  hostname = hostname_;
   hosts = hosts_;
-
   estragon__reconnect(connect_cb);
 }
 
