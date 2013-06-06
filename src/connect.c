@@ -21,6 +21,7 @@ void estragon__reconnect(estragon_connect_cb connect_cb) {
   char* pair;
   char* port_sep;
   char host[16];
+  int r;
   int port;
   struct sockaddr_in addr;
 
@@ -47,7 +48,23 @@ void estragon__reconnect(estragon_connect_cb connect_cb) {
   /* Set up a TCP keepalive connection to the godot server */
   uv_tcp_init(loop, &client);
   uv_tcp_keepalive(&client, 1, 180);
-  uv_tcp_connect(&connect_req, &client, addr, estragon__on_connect);
+  r = uv_tcp_connect(&connect_req, &client, addr, estragon__on_connect);
+
+  if (r != 0) {
+    //
+    // This could potentially be one of the following errors:
+    //
+    //   * UV_EINVAL - wrong address family (IPv6 address is passed as a host)
+    //
+    // Remark (mmalecki): anything else? We should support IPv6 addresses in
+    // the future.
+    //
+    // In all of those cases we should try the next host and reconnect.
+    //
+    fprintf(stderr, "connect error: %s\n", uv_strerror(uv_last_error(loop)));
+    estragon__reconnect((estragon_connect_cb) connect_req.data);
+    return;
+  }
 }
 
 void estragon_connect(char** hosts_, estragon_connect_cb connect_cb) {
