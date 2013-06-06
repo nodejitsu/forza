@@ -2,36 +2,33 @@ var net = require('net'),
     path = require('path'),
     assert = require('assert'),
     spawn = require('child_process').spawn,
+    jsonStream = require('json-stream'),
     cb = require('assert-called');
 
 var PORT = 5432;
 
 var server = net.createServer(cb(function (socket) {
-  var data = '';
+  var stream = socket.pipe(jsonStream()),
+      chunks = [],
+      service = { 'logs/stdout': 0, 'logs/stderr': 0 };
 
-  socket.on('readable', function () {
-    var chunk = socket.read();
-    data += chunk;
-  });
+  stream.on('readable', cb(function () {
+    var chunk = stream.read();
 
-  socket.on('end', function () {
-    data = data.split('\n').filter(Boolean).map(JSON.parse).filter(function (d) {
-      return d && d.service.indexOf('logs/') === 0;
-    });
-
-    var service = { 'logs/stdout': 0, 'logs/stderr': 0 };
-    data.forEach(function (d) {
-      service[d.service] += d.description.split('\n').filter(Boolean).length
-      assert(d.description.match(d.service === 'logs/stdout'
+    if (chunk && chunk.service.indexOf('logs/') === 0) {
+      service[chunk.service] += chunk.description.split('\n').filter(Boolean).length;
+      assert(chunk.description.match(chunk.service === 'logs/stdout'
         ? /Hello, stdout!\n/
         : /Hello, stderr!\n/
-      ))
-    });
+      ));
+    }
+  }));
+
+  socket.on('end', cb(function () {
     assert.equal(service['logs/stdout'], 1024);
     assert.equal(service['logs/stderr'], 1024);
-
     server.close();
-  });
+  }));
 }));
 
 server.listen(PORT, function () {
