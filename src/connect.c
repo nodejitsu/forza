@@ -71,10 +71,14 @@ void estragon__on_connect(uv_connect_t* req, int status) {
   }
 }
 
+void estragon__reconnect_on_close(uv_handle_t* handle) {
+  estragon__reconnect(NULL);
+}
+
 void estragon__on_write(uv_write_t* req, int status) {
   if (status) {
     fprintf(stderr, "write error: %s\n", uv_strerror(uv_last_error(loop)));
-    estragon__reconnect(NULL);
+    uv_close((uv_handle_t*) &client, estragon__reconnect_on_close);
   }
   free(req);
 }
