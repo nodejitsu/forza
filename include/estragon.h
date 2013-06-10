@@ -29,7 +29,7 @@ struct estragon_metric {
   estragon_metric_meta_t* meta;
 } typedef estragon_metric_t;
 
-void estragon_connect(char** hosts, estragon_connect_cb connect_cb_);
+void estragon_connect(char** hosts, char* hostname, estragon_connect_cb connect_cb_);
 void estragon_send(estragon_metric_t* metric);
 void estragon_close();
 estragon_metric_t* estragon_new_metric();
