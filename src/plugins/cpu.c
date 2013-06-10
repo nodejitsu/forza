@@ -30,7 +30,13 @@ void cpu__send_usage(uv_timer_t *timer, int status) {
   estragon_free_metric(metric);
 }
 
-int cpu_init() {
+void cpu__process_exit_cb(int exit_status, int term_signal) {
+  uv_timer_stop(&cpu_timer);
+}
+
+int cpu_init(estragon_plugin_t* plugin) {
+  plugin->process_exit_cb = cpu__process_exit_cb;
+
   uv_timer_init(uv_default_loop(), &cpu_timer);
   uv_timer_start(&cpu_timer, cpu__send_usage, 0, 5000);
 

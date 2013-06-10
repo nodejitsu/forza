@@ -20,7 +20,13 @@ void mem__send_usage(uv_timer_t *timer, int status) {
   estragon_free_metric(metric);
 }
 
+void mem__process_exit_cb(int exit_status, int term_singal) {
+  uv_timer_stop(&mem_timer);
+}
+
 int mem_init(estragon_plugin_t* plugin) {
+  plugin->process_exit_cb = mem__process_exit_cb;
+
   uv_timer_init(uv_default_loop(), &mem_timer);
   uv_timer_start(&mem_timer, mem__send_usage, 0, 5000);
 
