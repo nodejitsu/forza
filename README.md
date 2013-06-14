@@ -42,3 +42,12 @@ Sends:
   "service":"health/machine/memory"
 }
 ```
+
+## Testing
+
+Tests require all plugins:
+
+```bash
+./configure --with-plugin uptime --with-plugin mem --with-plugin cpu --with-plugin process --with-plugin heartbeat --with-plugin port
+npm test
+```
