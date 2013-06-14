@@ -1,0 +1,12 @@
+{
+  "name": "estragon",
+  "version": "0.0.0",
+  "devDependencies": {
+    "json-stream": "0.2.x",
+    "assert-called": "0.1.x",
+    "async": "0.2.x"
+  },
+  "scripts": {
+    "test": "test/run"
+  }
+}
