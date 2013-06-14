@@ -60,7 +60,8 @@ cleanall:
 	make clean -C deps/saneopt/
 	make clean -C deps/env/
 
-test:
+test: all
+	npm install
 	test/run
 
 .PHONY: all test clean cleanall
