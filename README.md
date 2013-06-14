@@ -48,6 +48,7 @@ Sends:
 Tests require all plugins:
 
 ```bash
-./configure --with-plugin uptime --with-plugin mem --with-plugin cpu --with-plugin process --with-plugin heartbeat --with-plugin port
+./configure --with-plugin uptime --with-plugin mem --with-plugin cpu --with-plugin process --with-plugin heartbeat --with-plugin port --with-plugin logs
+make
 npm test
 ```
