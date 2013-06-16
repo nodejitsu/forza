@@ -1,5 +1,5 @@
 # godot
-THe Monitoring Agent.
+The Monitoring Agent.
 
 ## Build
 
@@ -31,7 +31,7 @@ Sends:
 }
 ```
 
-### `memory`
+### `mem`
 
 Sends:
 
