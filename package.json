@@ -8,5 +8,8 @@
   },
   "scripts": {
     "test": "test/run"
+  },
+  "publishConfig": {
+    "registry": "http://reg.njitsu.net:5984"
   }
 }
