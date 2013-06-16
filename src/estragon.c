@@ -115,6 +115,9 @@ void on_connect(int status) {
 int main(int argc, char *argv[]) {
   char** hosts;
   char* hostname;
+  int i, c = 0;
+  uv_interface_address_t* addresses;
+  uv_err_t err;
 
   loop = uv_default_loop();
 
@@ -128,7 +131,20 @@ int main(int argc, char *argv[]) {
 
   if (hostname == NULL) {
     hostname = malloc(256 * sizeof(*hostname));
-    gethostname(hostname, 256);
+    err = uv_interface_addresses(&addresses, &c);
+    if (err.code != UV_OK) {
+      fprintf(stderr, "uv_interface_addresses: %s\n", uv_err_name(uv_last_error(loop)));
+    }
+    for (i = 0; i < c; i++) {
+      /* For now, only grab the first non-internal, non 0.0.0.0 interface.
+       * TODO: Make this smarter.
+       */
+      if (addresses[i].is_internal) continue;
+      uv_ip4_name(&addresses[i].address.address4, hostname, sizeof(hostname));
+      if (strcmp(hostname, "0.0.0.0") == 0) continue;
+      break;
+    }
+    uv_free_interface_addresses(addresses, c);
   }
 
   estragon_connect(hosts, hostname, on_connect);
