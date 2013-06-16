@@ -134,6 +134,7 @@ int main(int argc, char *argv[]) {
     err = uv_interface_addresses(&addresses, &c);
     if (err.code != UV_OK) {
       fprintf(stderr, "uv_interface_addresses: %s\n", uv_err_name(uv_last_error(loop)));
+      return 1;
     }
     for (i = 0; i < c; i++) {
       /* For now, only grab the first non-internal, non 0.0.0.0 interface.
@@ -141,7 +142,10 @@ int main(int argc, char *argv[]) {
        */
       if (addresses[i].is_internal) continue;
       uv_ip4_name(&addresses[i].address.address4, hostname, sizeof(hostname));
-      if (strcmp(hostname, "0.0.0.0") == 0) continue;
+      if (strcmp(hostname, "0.0.0.0") == 0) {
+        hostname = NULL;
+        continue;
+      }
       break;
     }
     uv_free_interface_addresses(addresses, c);
