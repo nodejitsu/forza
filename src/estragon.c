@@ -142,8 +142,7 @@ int main(int argc, char *argv[]) {
        */
       if (addresses[i].is_internal) continue;
       uv_ip4_name(&addresses[i].address.address4, hostname, sizeof(hostname));
-      if (strcmp(hostname, "0.0.0.0") == 0) hostname = NULL;
-      if (hostname != NULL) break;
+      if (strcmp(hostname, "0.0.0.0") != 0) break;
     }
     uv_free_interface_addresses(addresses, c);
   }
