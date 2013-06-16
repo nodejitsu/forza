@@ -27,7 +27,7 @@ void estragon__reconnect(estragon_connect_cb connect_cb) {
 
   ++host_index;
   pair = hosts[host_index];
-  if (host == NULL) {
+  if (pair == NULL) {
     host_index = 0;
     pair = hosts[host_index];
   }
