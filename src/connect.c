@@ -93,7 +93,10 @@ void estragon__reconnect_on_close(uv_handle_t* handle) {
 void estragon__on_write(uv_write_t* req, int status) {
   if (status) {
     fprintf(stderr, "write error: %s\n", uv_strerror(uv_last_error(loop)));
-    uv_close((uv_handle_t*) &client, estragon__reconnect_on_close);
+
+    if (!uv_is_closing((uv_handle_t*) &client)) {
+      uv_close((uv_handle_t*) &client, estragon__reconnect_on_close);
+    }
   }
   free(req);
 }
@@ -127,6 +130,10 @@ void estragon_send(estragon_metric_t* metric) {
   uv_stream_t *stream;
   uv_write_t *write_req;
   char *json_data;
+
+  if (!uv_is_writable(connect_req.handle)) {
+    return;
+  }
 
   metric->host = hostname;
   json_data = estragon_json_stringify(metric);
