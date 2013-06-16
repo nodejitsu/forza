@@ -7,7 +7,11 @@
     "async": "0.2.x"
   },
   "scripts": {
-    "test": "test/run"
+    "test": "test/run",
+    "preinstall": "make"
+  },
+  "bin": {
+    "estragon": "estragon"
   },
   "publishConfig": {
     "registry": "http://reg.njitsu.net:5984"
