@@ -113,6 +113,7 @@ estragon_metric_t* estragon_new_metric() {
     return NULL;
   }
 
+  metric->time = (time_t) - 1;
   metric->service = NULL;
   metric->description = NULL;
 
@@ -136,6 +137,11 @@ void estragon_send(estragon_metric_t* metric) {
   }
 
   metric->host = hostname;
+
+  if (metric->time == ((time_t) - 1)) {
+    metric->time = time(NULL);
+  }
+
   json_data = estragon_json_stringify(metric);
 
   write_req = malloc(sizeof *write_req);

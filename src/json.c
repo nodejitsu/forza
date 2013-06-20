@@ -85,8 +85,10 @@ char* estragon_json_stringify(estragon_metric_t* metric) {
   json[1] = '\0';
 
   snprintf(buf, sizeof(buf), "%.8f", metric->metric);
-
   estragon__json_append(&json, "metric", buf, 0);
+
+  snprintf(buf, sizeof(buf), "%lu", metric->time);
+  estragon__json_append(&json, "time", buf, 1);
 
   str_buf = estragon__json_stringify_string(metric->host);
   estragon__json_append(&json, "host", str_buf, 1);

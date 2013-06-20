@@ -23,6 +23,7 @@ struct estragon_metric_meta {
 struct estragon_metric {
   double metric;
   int ttl;
+  time_t time;
   char* service;
   char* host;
   char* description;
