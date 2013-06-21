@@ -35,13 +35,13 @@ estragon: $(OBJS)
 	gcc $(LDFLAGS) $^ deps/libuv/libuv.a deps/saneopt/libsaneopt.a deps/env/libenv.a -o $@
 
 libuv:
-	make -C deps/libuv/
+	$(MAKE) -C deps/libuv/
 
 libsaneopt:
-	make -C deps/saneopt/
+	$(MAKE) -C deps/saneopt/
 
 libenv:
-	make -C deps/env/
+	$(MAKE) -C deps/env/
 
 ifeq (Darwin, $(uname_S))
 libinterposed: src/plugins/port/libinterposed.c
@@ -56,9 +56,9 @@ clean:
 
 cleanall:
 	rm -f estragon
-	make clean -C deps/libuv/
-	make clean -C deps/saneopt/
-	make clean -C deps/env/
+	$(MAKE) clean -C deps/libuv/
+	$(MAKE) clean -C deps/saneopt/
+	$(MAKE) clean -C deps/env/
 
 test: all
 	npm install
