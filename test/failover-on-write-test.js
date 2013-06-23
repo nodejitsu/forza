@@ -9,6 +9,7 @@ var net = require('net'),
 var PORT0 = 5434,
     PORT1 = 5435,
     gotFirstConnection = false,
+    firstClosed = false,
     child;
 
 var server0 = net.createServer(cb(function (socket) {
@@ -20,10 +21,11 @@ var server0 = net.createServer(cb(function (socket) {
 
   stream.on('readable', cb(function () {
     var chunk = stream.read();
-    if (chunk && chunk.service === 'health/process/uptime') {
+    if (chunk && !firstClosed) {
       console.log('closing first server');
       server0.close();
       socket.destroy();
+      firstClosed = true;
     }
   }));
 }));
@@ -36,7 +38,7 @@ var server1 = net.createServer(cb(function (socket) {
 
   stream.on('readable', cb(function () {
     var chunk = stream.read();
-    if (chunk && chunk.service === 'health/process/uptime') {
+    if (chunk) {
       child.kill();
       process.exit();
     }
