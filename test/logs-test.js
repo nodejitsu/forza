@@ -5,7 +5,7 @@ var net = require('net'),
     jsonStream = require('json-stream'),
     cb = require('assert-called');
 
-var PORT = 5432;
+var PORT = 5476;
 
 var server = net.createServer(cb(function (socket) {
   var stream = socket.pipe(jsonStream()),
