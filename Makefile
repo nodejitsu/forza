@@ -48,7 +48,7 @@ libinterposed: src/plugins/port/libinterposed.c
 	gcc -dynamiclib -o libinterposed.dylib src/plugins/port/libinterposed.c
 else
 libinterposed: src/plugins/port/libinterposed.c
-	gcc $(CFLAGS) -fPIC -shared -o libinterposed.so src/plugins/port/libinterposed.c
+	gcc $(CFLAGS) -D_GNU_SOURCE -fPIC -shared -o libinterposed.so src/plugins/port/libinterposed.c
 endif
 
 clean:
