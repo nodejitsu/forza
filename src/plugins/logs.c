@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <uv.h>
 #include <estragon.h>
+#include "logs.h"
 
 static uv_buf_t on_alloc(uv_handle_t* handle, size_t suggested_size) {
   return uv_buf_init((char*) malloc(suggested_size), suggested_size);
 }
 
-void on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, const char* type) {
+void on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, logs__type_t type) {
   char* str;
   estragon_metric_t* metric;
 
@@ -25,7 +26,7 @@ void on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, const char* type) 
 
   metric->metric = 1.0;
   metric->description = str;
-  metric->service = (type == "stdout") ? "logs/stdout" : "logs/stderr";
+  metric->service = (type == LOGS__STDOUT) ? "logs/stdout" : "logs/stderr";
 
   estragon_send(metric);
 
@@ -35,11 +36,11 @@ void on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, const char* type) 
 }
 
 void on_stdout_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
-  on_read(tcp, nread, rdbuf, "stdout");
+  on_read(tcp, nread, rdbuf, LOGS__STDOUT);
 }
 
 void on_stderr_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
-  on_read(tcp, nread, rdbuf, "stderr");
+  on_read(tcp, nread, rdbuf, LOGS__STDERR);
 }
 
 void process_spawned_cb(uv_process_t* process, uv_process_options_t* options) {
