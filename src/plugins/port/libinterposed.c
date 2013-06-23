@@ -31,7 +31,6 @@ int __interposed_ipc = 3;
 
 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
   int result;
-  int desired;
   char msg[128];
   int msg_length;
   struct sockaddr_in* in_addr;
@@ -43,7 +42,6 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
 
   if (addr->sa_family == AF_INET) {
     in_addr = (struct sockaddr_in*) addr;
-    desired = in_addr->sin_port;
     result = original_bind(sockfd, addr, addrlen);
     while (result = -1 && (errno == EADDRINUSE || errno == EACCES)) {
       in_addr->sin_port = ntohs(htons(in_addr->sin_port) + 1);
