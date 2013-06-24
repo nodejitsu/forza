@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "test/run",
-    "preinstall": "./configure --with-plugin uptime --with-plugin mem --with-plugin cpu --with-plugin process --with-plugin heartbeat --with-plugin port --with-plugin logs && make"
+    "preinstall": "./configure --with-plugin uptime --with-plugin mem --with-plugin cpu --with-plugin process --with-plugin heartbeat --with-plugin logs --with-plugin start && make"
   },
   "bin": {
     "estragon": "estragon"
