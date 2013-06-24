@@ -10,24 +10,12 @@
 uv_loop_t* loop;
 char* lib_path;
 
-static uv_buf_t port__on_alloc(uv_handle_t* handle, size_t suggested_size) {
-  return uv_buf_init((char*) malloc(suggested_size), suggested_size);
-}
-
-void port__on_ipc_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+void port__on_ipc_data(char* data) {
   int port;
-  char* str;
   char msg[8];
   estragon_metric_t* metric;
 
-  if (nread == -1) {
-    return;
-  }
-
-  str = malloc((nread + 1) * sizeof(char));
-
-  memcpy(str, rdbuf.base, nread);
-  if (sscanf(str, "port=%d\n", &port) == 1) {
+  if (sscanf(data, "port=%d\n", &port) == 1) {
     sprintf(msg, "%d", port);
 
     metric = estragon_new_metric();
@@ -39,13 +27,6 @@ void port__on_ipc_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
 
     estragon_free_metric(metric);
   }
-
-  free(str);
-  free(rdbuf.base);
-}
-
-void port__process_spawned_cb(uv_process_t* process, uv_process_options_t* options) {
-  uv_read_start(options->stdio[3].data.stream, port__on_alloc, port__on_ipc_read);
 }
 
 void port__process_options_cb(uv_process_options_t* options) {
@@ -76,7 +57,7 @@ int port_init(estragon_plugin_t* plugin) {
 #endif
 
   plugin->process_options_cb = port__process_options_cb;
-  plugin->process_spawned_cb = port__process_spawned_cb;
+  plugin->ipc_data_cb = port__on_ipc_data;
 
   return 0;
 }

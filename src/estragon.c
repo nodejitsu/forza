@@ -36,6 +36,53 @@ void on_process_exit(uv_process_t* process, int exit_status, int term_signal) {
   uv_close((uv_handle_t*) process, NULL);
 }
 
+static uv_buf_t estragon__on_alloc(uv_handle_t* handle, size_t suggested_size) {
+  return uv_buf_init((char*) malloc(suggested_size), suggested_size);
+}
+
+void estragon__on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, estragon__stdio_type_t type) {
+  int i;
+  char* data;
+
+  if (nread == -1) {
+    //
+    // XXX(mmalecki): EOF. We should tell someone.
+    //
+    return;
+  }
+
+  data = malloc((nread + 1) * sizeof(char));
+  memcpy(data, rdbuf.base, nread);
+  data[nread] = '\0';
+
+  for (i = 0; i < PLUGIN_COUNT; i++) {
+    if (type == STDIO_STDOUT && plugins[i].stdout_data_cb) {
+      plugins[i].stdout_data_cb(data);
+    }
+    else if (type == STDIO_STDERR && plugins[i].stderr_data_cb) {
+      plugins[i].stderr_data_cb(data);
+    }
+    else if (type == STDIO_IPC && plugins[i].ipc_data_cb) {
+      plugins[i].ipc_data_cb(data);
+    }
+  }
+
+  free(rdbuf.base);
+  free(data);
+}
+
+void estragon__on_stdout_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+  estragon__on_read(tcp, nread, rdbuf, STDIO_STDOUT);
+}
+
+void estragon__on_stderr_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+  estragon__on_read(tcp, nread, rdbuf, STDIO_STDERR);
+}
+
+void estragon__on_ipc_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+  estragon__on_read(tcp, nread, rdbuf, STDIO_IPC);
+}
+
 void spawn() {
   int i;
   char** env = NULL;
@@ -89,6 +136,10 @@ void spawn() {
       plugins[i].process_spawned_cb(process, &options);
     }
   }
+
+  uv_read_start(options.stdio[1].data.stream, estragon__on_alloc, estragon__on_stdout_read);
+  uv_read_start(options.stdio[2].data.stream, estragon__on_alloc, estragon__on_stderr_read);
+  uv_read_start(options.stdio[3].data.stream, estragon__on_alloc, estragon__on_ipc_read);
 }
 
 void on_connect(int status) {
