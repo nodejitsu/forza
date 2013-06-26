@@ -17,17 +17,14 @@ uv_loop_t* loop;
 char* lib_path;
 
 void start__on_ipc_data(char* data) {
-  int port;
-  char msg[8];
+  unsigned short port;
   estragon_metric_t* metric;
 
-  if (sscanf(data, "port=%d\n", &port) == 1) {
-    sprintf(msg, "%d", port);
-
+  if (sscanf(data, "port=%hu\n", &port) == 1) {
     metric = estragon_new_metric();
     metric->metric = 1.0;
-    metric->description = msg;
-    metric->service = "port";
+    metric->service = "health/process/start";
+    metric->meta->port = port;
 
     estragon_send(metric);
 

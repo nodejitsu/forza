@@ -75,6 +75,30 @@ char* estragon__json_stringify_string(char* string) {
   return out;
 }
 
+char* estragon__json_stringify_meta(estragon_metric_meta_t* meta) {
+  char* json = malloc(2);
+  char buf[128];
+  int first = 0;
+
+  json[0] = '{';
+  json[1] = '\0';
+
+  if (meta->uptime != ((long long int) - 1)) {
+    snprintf(buf, sizeof(buf), "%lld", meta->uptime);
+    estragon__json_append(&json, "uptime", buf, first++);
+  }
+
+  if (meta->port != ((unsigned short) - 1)) {
+    snprintf(buf, sizeof(buf), "%hu", meta->port);
+    estragon__json_append(&json, "port", buf, first++);
+  }
+
+  json = realloc(json, strlen(json) + 2);
+  strncat(json, "}", 1);
+
+  return json;
+}
+
 char* estragon_json_stringify(estragon_metric_t* metric) {
   char* json = malloc(2);
   char buf[128];
@@ -105,6 +129,10 @@ char* estragon_json_stringify(estragon_metric_t* metric) {
     estragon__json_append(&json, "service", str_buf, 1);
     free(str_buf);
   }
+
+  str_buf = estragon__json_stringify_meta(metric->meta);
+  estragon__json_append(&json, "meta", str_buf, 1);
+  free(str_buf);
 
   json = realloc(json, strlen(json) + 3);
   strncat(json, "}\n", 2);

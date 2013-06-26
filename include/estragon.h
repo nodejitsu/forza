@@ -22,6 +22,7 @@ struct estragon_plugin {
 struct estragon_metric_meta {
   int pid;
   long long uptime;
+  unsigned short port;
 } typedef estragon_metric_meta_t;
 
 struct estragon_metric {
