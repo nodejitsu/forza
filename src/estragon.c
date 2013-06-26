@@ -23,6 +23,8 @@ static uv_pipe_t child_stdout;
 static uv_pipe_t child_stderr;
 static uv_pipe_t child_ipc;
 
+static uv_process_t* child;
+
 void on_process_exit(uv_process_t* process, int exit_status, int term_signal) {
   int i;
 
@@ -89,7 +91,7 @@ void spawn() {
 
   env = env_copy(environ, env);
 
-  uv_process_t* process = malloc(sizeof(uv_process_t));
+  child = malloc(sizeof(uv_process_t));
   uv_stdio_container_t stdio[4];
   uv_process_options_t options;
 
@@ -126,14 +128,14 @@ void spawn() {
     }
   }
 
-  if (uv_spawn(loop, process, options)) {
+  if (uv_spawn(loop, child, options)) {
     fprintf(stderr, "uv_spawn: %s\n", uv_err_name(uv_last_error(loop)));
     return;
   }
 
   for (i = 0; i < PLUGIN_COUNT; i++) {
     if (plugins[i].process_spawned_cb) {
-      plugins[i].process_spawned_cb(process, &options);
+      plugins[i].process_spawned_cb(child, &options);
     }
   }
 
@@ -163,12 +165,22 @@ void on_connect(int status) {
   spawn();
 }
 
+void estragon__on_exit() {
+  //
+  // Make best effort to kill the child process before we exit to ensure
+  // consistency.
+  //
+  uv_process_kill(child, SIGKILL);
+}
+
 int main(int argc, char *argv[]) {
   char** hosts;
   char* hostname;
   int i, c = 0;
   uv_interface_address_t* addresses;
   uv_err_t err;
+
+  atexit(estragon__on_exit);
 
   loop = uv_default_loop();
 
