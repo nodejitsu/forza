@@ -6,28 +6,30 @@ var net = require('net'),
     cb = require('assert-called');
 
 var PORT = 5437,
+    child,
     gotMessage = false;
 
 var server = net.createServer(cb(function (socket) {
   var stream = socket.pipe(jsonStream());
 
   stream.on('readable', cb(function () {
-    var chunk = socket.read(),
+    var chunk = stream.read(),
         clientPort;
 
     if (chunk && chunk.service === 'health/process/start') {
       assert.equal(chunk.metric, 1.0);
       gotMessage = true;
+
+      child.kill();
+      socket.destroy();
+      server.close();
+      process.exit();
     }
   }));
-
-  socket.on('end', function () {
-    server.close();
-  });
 }));
 
 server.listen(PORT, cb(function () {
-  var child = spawn(
+  child = spawn(
     path.join(__dirname, '..', 'estragon'),
     [ '-h', '127.0.0.1:' + PORT.toString(), '--', 'node', path.join(__dirname, 'fixtures', 'listen.js') ]
   );
