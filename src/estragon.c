@@ -23,6 +23,8 @@ static uv_pipe_t child_stdout;
 static uv_pipe_t child_stderr;
 static uv_pipe_t child_ipc;
 
+static uv_process_t* child;
+
 void on_process_exit(uv_process_t* process, int exit_status, int term_signal) {
   int i;
 
@@ -36,13 +38,60 @@ void on_process_exit(uv_process_t* process, int exit_status, int term_signal) {
   uv_close((uv_handle_t*) process, NULL);
 }
 
+static uv_buf_t estragon__on_alloc(uv_handle_t* handle, size_t suggested_size) {
+  return uv_buf_init((char*) malloc(suggested_size), suggested_size);
+}
+
+void estragon__on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, estragon__stdio_type_t type) {
+  int i;
+  char* data;
+
+  if (nread == -1) {
+    //
+    // XXX(mmalecki): EOF. We should tell someone.
+    //
+    return;
+  }
+
+  data = malloc((nread + 1) * sizeof(char));
+  memcpy(data, rdbuf.base, nread);
+  data[nread] = '\0';
+
+  for (i = 0; i < PLUGIN_COUNT; i++) {
+    if (type == STDIO_STDOUT && plugins[i].stdout_data_cb) {
+      plugins[i].stdout_data_cb(data);
+    }
+    else if (type == STDIO_STDERR && plugins[i].stderr_data_cb) {
+      plugins[i].stderr_data_cb(data);
+    }
+    else if (type == STDIO_IPC && plugins[i].ipc_data_cb) {
+      plugins[i].ipc_data_cb(data);
+    }
+  }
+
+  free(rdbuf.base);
+  free(data);
+}
+
+void estragon__on_stdout_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+  estragon__on_read(tcp, nread, rdbuf, STDIO_STDOUT);
+}
+
+void estragon__on_stderr_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+  estragon__on_read(tcp, nread, rdbuf, STDIO_STDERR);
+}
+
+void estragon__on_ipc_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+  estragon__on_read(tcp, nread, rdbuf, STDIO_IPC);
+}
+
 void spawn() {
   int i;
   char** env = NULL;
 
   env = env_copy(environ, env);
 
-  uv_process_t* process = malloc(sizeof(uv_process_t));
+  child = malloc(sizeof(uv_process_t));
   uv_stdio_container_t stdio[4];
   uv_process_options_t options;
 
@@ -79,16 +128,20 @@ void spawn() {
     }
   }
 
-  if (uv_spawn(loop, process, options)) {
+  if (uv_spawn(loop, child, options)) {
     fprintf(stderr, "uv_spawn: %s\n", uv_err_name(uv_last_error(loop)));
     return;
   }
 
   for (i = 0; i < PLUGIN_COUNT; i++) {
     if (plugins[i].process_spawned_cb) {
-      plugins[i].process_spawned_cb(process, &options);
+      plugins[i].process_spawned_cb(child, &options);
     }
   }
+
+  uv_read_start(options.stdio[1].data.stream, estragon__on_alloc, estragon__on_stdout_read);
+  uv_read_start(options.stdio[2].data.stream, estragon__on_alloc, estragon__on_stderr_read);
+  uv_read_start(options.stdio[3].data.stream, estragon__on_alloc, estragon__on_ipc_read);
 }
 
 void on_connect(int status) {
@@ -112,12 +165,22 @@ void on_connect(int status) {
   spawn();
 }
 
+void estragon__on_exit() {
+  //
+  // Make best effort to kill the child process before we exit to ensure
+  // consistency.
+  //
+  uv_process_kill(child, SIGKILL);
+}
+
 int main(int argc, char *argv[]) {
   char** hosts;
   char* hostname;
   int i, c = 0;
   uv_interface_address_t* addresses;
   uv_err_t err;
+
+  atexit(estragon__on_exit);
 
   loop = uv_default_loop();
 

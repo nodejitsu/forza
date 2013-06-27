@@ -6,6 +6,7 @@
 typedef void (*estragon_process_exit_cb)(int exit_status, int term_signal);
 typedef void (*estragon_process_options_cb)(uv_process_options_t* options);
 typedef void (*estragon_process_spawned_cb)(uv_process_t* process, uv_process_options_t* options);
+typedef void (*estragon_stdio_data_cb)(char* data);
 typedef void (*estragon_connect_cb)(int status);
 
 struct estragon_plugin {
@@ -13,11 +14,15 @@ struct estragon_plugin {
   estragon_process_exit_cb process_exit_cb;
   estragon_process_options_cb process_options_cb;
   estragon_process_spawned_cb process_spawned_cb;
+  estragon_stdio_data_cb stdout_data_cb;
+  estragon_stdio_data_cb stderr_data_cb;
+  estragon_stdio_data_cb ipc_data_cb;
 } typedef estragon_plugin_t;
 
 struct estragon_metric_meta {
   int pid;
   long long uptime;
+  unsigned short port;
 } typedef estragon_metric_meta_t;
 
 struct estragon_metric {
@@ -29,6 +34,13 @@ struct estragon_metric {
   char* description;
   estragon_metric_meta_t* meta;
 } typedef estragon_metric_t;
+
+enum estragon__stdio_type {
+  STDIO_STDOUT,
+  STDIO_STDERR,
+  STDIO_IPC
+} typedef estragon__stdio_type_t;
+
 
 void estragon_connect(char** hosts, char* hostname, estragon_connect_cb connect_cb_);
 void estragon_send(estragon_metric_t* metric);

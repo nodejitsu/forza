@@ -29,7 +29,7 @@ src/%.o: src/%.c include/estragon-private/plugins.h
 src/plugins/%.o: src/plugins/%.c
 	gcc $(CFLAGS) -c $< -o $@
 
-src/plugins/port.o: libinterposed src/plugins/port.c
+src/plugins/start.o: libinterposed
 
 estragon: $(OBJS)
 	gcc $^ deps/libuv/libuv.a deps/saneopt/libsaneopt.a deps/env/libenv.a $(LDFLAGS) -o $@
@@ -44,11 +44,11 @@ libenv:
 	$(MAKE) -C deps/env/
 
 ifeq (Darwin, $(uname_S))
-libinterposed: src/plugins/port/libinterposed.c
-	gcc -dynamiclib -o libinterposed.dylib src/plugins/port/libinterposed.c
+libinterposed: src/plugins/start/libinterposed.c
+	gcc -dynamiclib -o libinterposed.dylib $^
 else
-libinterposed: src/plugins/port/libinterposed.c
-	gcc $(CFLAGS) -D_GNU_SOURCE -fPIC -shared -o libinterposed.so src/plugins/port/libinterposed.c
+libinterposed: src/plugins/start/libinterposed.c
+	gcc $(CFLAGS) -D_GNU_SOURCE -fPIC -shared -o libinterposed.so $^
 endif
 
 clean:

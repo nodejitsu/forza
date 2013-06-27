@@ -3,53 +3,31 @@
 #include <estragon.h>
 #include "logs.h"
 
-static uv_buf_t on_alloc(uv_handle_t* handle, size_t suggested_size) {
-  return uv_buf_init((char*) malloc(suggested_size), suggested_size);
-}
-
-void on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, logs__type_t type) {
-  char* str;
+void logs__on_stdio(char* data, estragon__stdio_type_t type) {
   estragon_metric_t* metric;
-
-  if (nread == -1) {
-    //
-    // EOF. We should probably notify logging server, but ignore for now.
-    //
-    return;
-  }
 
   metric = estragon_new_metric();
 
-  str = malloc((nread + 1) * sizeof(char));
-  memcpy(str, rdbuf.base, nread);
-  str[nread] = '\0';
-
   metric->metric = 1.0;
-  metric->description = str;
-  metric->service = (type == LOGS__STDOUT) ? "logs/stdout" : "logs/stderr";
+  metric->description = data;
+  metric->service = (type == STDIO_STDOUT) ? "logs/stdout" : "logs/stderr";
 
   estragon_send(metric);
 
   estragon_free_metric(metric);
-  free(str);
-  free(rdbuf.base);
 }
 
-void on_stdout_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
-  on_read(tcp, nread, rdbuf, LOGS__STDOUT);
+void logs__on_stdout(char* data) {
+  logs__on_stdio(data, STDIO_STDOUT);
 }
 
-void on_stderr_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
-  on_read(tcp, nread, rdbuf, LOGS__STDERR);
-}
-
-void process_spawned_cb(uv_process_t* process, uv_process_options_t* options) {
-  uv_read_start(options->stdio[1].data.stream, on_alloc, on_stdout_read);
-  uv_read_start(options->stdio[2].data.stream, on_alloc, on_stderr_read);
+void logs__on_stderr(char* data) {
+  logs__on_stdio(data, STDIO_STDERR);
 }
 
 int logs_init(estragon_plugin_t* plugin) {
-  plugin->process_spawned_cb = process_spawned_cb;
+  plugin->stdout_data_cb = logs__on_stdout;
+  plugin->stderr_data_cb = logs__on_stderr;
 
   return 0;
 }
