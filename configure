@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os.path
 import argparse
 import subprocess
 
@@ -15,7 +16,10 @@ parser = argparse.ArgumentParser(description='Configure `estragon` build.')
 parser.add_argument('--with-plugin', action='append')
 args = parser.parse_args()
 
-version = subprocess.check_output(['git', 'log', '-n1', '--pretty=%h'])
+if os.path.isdir('.git'):
+    version = subprocess.check_output(['git', 'log', '-n1', '--pretty=%h'])
+    config += 'ESTRAGON_VERSION_HASH = ' + version
+
 plugins = unique(args.with_plugin or ['heartbeat'])
 
 print 'Building `estragon` with plugins: ' + ', '.join(plugins)
@@ -29,8 +33,6 @@ plugins_h += '#define PLUGIN_COUNT ' + str(len(plugins)) + '\n'
 for plugin in plugins:
     config += 'OBJS += src/plugins/' + plugin + '.o\n'
     plugins_h += '#include "../../src/plugins/' + plugin + '.h"\n'
-
-config += 'ESTRAGON_VERSION_HASH = ' + version
 
 plugins_h += 'int (*_plugin_init_calls[PLUGIN_COUNT])(estragon_plugin_t* plugin) = { '
 plugins_h += ', '.join(plugin + '_init' for plugin in plugins) + ' };\n'

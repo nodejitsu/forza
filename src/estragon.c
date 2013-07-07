@@ -184,7 +184,11 @@ int main(int argc, char *argv[]) {
 
   loop = uv_default_loop();
 
+#ifdef ESTRAGON_VERSION_HASH
   printf("estragon "ESTRAGON_VERSION_HASH"\n");
+#else
+  printf("estragon\n");
+#endif
 
   saneopt_t* opt = saneopt_init(argc - 1, argv + 1);
   saneopt_alias(opt, "host", "h");
