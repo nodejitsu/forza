@@ -5,7 +5,9 @@ OBJS += src/connect.o
 OBJS += src/json.o
 
 CFLAGS=-g -Wall -Ideps/libuv/include -Ideps/saneopt/include -Ideps/env/include -Iinclude
-CFLAGS += -DESTRAGON_VERSION_HASH='"$(ESTRAGON_VERSION_HASH)"'
+ifdef $(ESTRAGON_VERSION_HASH)
+  CFLAGS += -DESTRAGON_VERSION_HASH='"$(ESTRAGON_VERSION_HASH)"'
+endif
 
 uname_S=$(shell uname -s)
 
