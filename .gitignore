@@ -4,4 +4,5 @@ estragon
 config.mk
 include/estragon-private/plugins.h
 libinterposed.*
+!src/plugins/start/libinterposed.c
 node_modules
