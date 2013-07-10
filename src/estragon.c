@@ -151,8 +151,6 @@ void on_connect(int status) {
     return;
   }
 
-  printf("connected.\n");
-
   for (i = 0; i < PLUGIN_COUNT; i++) {
     if (_plugin_init_calls[i](&plugins[i]) != 0) {
       fprintf(stderr, "error initializing plugin %i\n", i);

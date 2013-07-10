@@ -16,6 +16,8 @@ static int host_index = -1;
 static char** hosts;
 
 void estragon__on_connect(uv_connect_t* req, int status);
+void estragon__reconnect_on_close(uv_handle_t* handle);
+void estragon__reconnect_on_connect_error(uv_handle_t* handle);
 
 void estragon__reconnect(estragon_connect_cb connect_cb) {
   char* pair;
@@ -77,9 +79,11 @@ void estragon_connect(char** hosts_, char* hostname_, estragon_connect_cb connec
 void estragon__on_connect(uv_connect_t* req, int status) {
   if (status != 0) {
     fprintf(stderr, "connect error: %s\n", uv_strerror(uv_last_error(loop)));
-    estragon__reconnect((estragon_connect_cb) req->data);
+    uv_close((uv_handle_t*) &client, estragon__reconnect_on_connect_error);
     return;
   }
+
+  printf("connected.\n");
 
   if (req->data != NULL) {
     ((estragon_connect_cb) req->data)(status);
@@ -88,6 +92,13 @@ void estragon__on_connect(uv_connect_t* req, int status) {
 
 void estragon__reconnect_on_close(uv_handle_t* handle) {
   estragon__reconnect(NULL);
+}
+
+void estragon__reconnect_on_connect_error(uv_handle_t* handle) {
+  estragon_connect_cb cb = (connect_req.data != NULL)
+    ? ((estragon_connect_cb) connect_req.data)
+    : NULL;
+  estragon__reconnect(cb);
 }
 
 void estragon__on_write(uv_write_t* req, int status) {
