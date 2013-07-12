@@ -25,6 +25,8 @@ static uv_pipe_t child_ipc;
 
 static uv_process_t* child;
 
+static saneopt_t* opt;
+
 void on_process_exit(uv_process_t* process, int exit_status, int term_signal) {
   int i;
 
@@ -152,6 +154,7 @@ void on_connect(int status) {
   }
 
   for (i = 0; i < PLUGIN_COUNT; i++) {
+    plugins[i].saneopt = opt;
     if (_plugin_init_calls[i](&plugins[i]) != 0) {
       fprintf(stderr, "error initializing plugin %i\n", i);
     }
@@ -188,7 +191,7 @@ int main(int argc, char *argv[]) {
   printf("estragon\n");
 #endif
 
-  saneopt_t* opt = saneopt_init(argc - 1, argv + 1);
+  opt = saneopt_init(argc - 1, argv + 1);
   saneopt_alias(opt, "host", "h");
   hosts = saneopt_get_all(opt, "host");
   hostname = saneopt_get(opt, "hostname");

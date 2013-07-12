@@ -2,6 +2,7 @@
 #define _ESTRAGON_H
 
 #include <uv.h>
+#include <saneopt.h>
 
 typedef void (*estragon_process_exit_cb)(int exit_status, int term_signal);
 typedef void (*estragon_process_options_cb)(uv_process_options_t* options);
@@ -17,12 +18,19 @@ struct estragon_plugin {
   estragon_stdio_data_cb stdout_data_cb;
   estragon_stdio_data_cb stderr_data_cb;
   estragon_stdio_data_cb ipc_data_cb;
+  saneopt_t* saneopt;
 } typedef estragon_plugin_t;
+
+struct estragon_metric_meta_app {
+  char* name;
+  char* user;
+} typedef estragon_metric_meta_app_t;
 
 struct estragon_metric_meta {
   int pid;
   long long uptime;
   unsigned short port;
+  estragon_metric_meta_app_t* app;
 } typedef estragon_metric_meta_t;
 
 struct estragon_metric {
