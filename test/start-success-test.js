@@ -18,6 +18,9 @@ var server = net.createServer(cb(function (socket) {
 
     if (chunk && chunk.service === 'health/process/start') {
       assert.equal(chunk.metric, 1.0);
+      assert.equal(chunk.meta.app.name, 'test-app');
+      assert.equal(chunk.meta.app.user, 'maciej');
+
       gotMessage = true;
 
       child.kill();
@@ -31,7 +34,10 @@ var server = net.createServer(cb(function (socket) {
 server.listen(PORT, cb(function () {
   child = spawn(
     path.join(__dirname, '..', 'estragon'),
-    [ '-h', '127.0.0.1:' + PORT.toString(), '--', 'node', path.join(__dirname, 'fixtures', 'listen.js') ]
+    [
+      '-h', '127.0.0.1:' + PORT.toString(), '--app-name', 'test-app', '--app-user', 'maciej',
+      '--', 'node', path.join(__dirname, 'fixtures', 'listen.js')
+    ]
   );
 }));
 

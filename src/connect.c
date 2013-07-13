@@ -131,6 +131,10 @@ estragon_metric_t* estragon_new_metric() {
   metric->meta->uptime = (long long int) - 1;
   metric->meta->port = (unsigned short) - 1;
 
+  metric->meta->app = malloc(sizeof(estragon_metric_meta_app_t));
+  metric->meta->app->user = NULL;
+  metric->meta->app->name = NULL;
+
   return metric;
 }
 

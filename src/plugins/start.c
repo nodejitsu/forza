@@ -4,6 +4,7 @@
 #include <string.h>
 #include <uv.h>
 #include <estragon.h>
+#include <saneopt.h>
 
 #define PATHMAX 1024
 
@@ -16,6 +17,9 @@ static uv_timer_t timeout_timer;
 uv_loop_t* loop;
 char* lib_path;
 
+static char* user;
+static char* name;
+
 void start__on_ipc_data(char* data) {
   unsigned short port;
   estragon_metric_t* metric;
@@ -25,6 +29,8 @@ void start__on_ipc_data(char* data) {
     metric->metric = 1.0;
     metric->service = "health/process/start";
     metric->meta->port = port;
+    metric->meta->app->user = user;
+    metric->meta->app->name = name;
 
     estragon_send(metric);
 
@@ -46,6 +52,8 @@ void start__failure() {
   metric->service = "health/process/start";
   metric->metric = 0.0;
   metric->description = buffer;
+  metric->meta->app->user = user;
+  metric->meta->app->name = name;
   estragon_send(metric);
   estragon_free_metric(metric);
 }
@@ -57,6 +65,9 @@ void start__success() {
 
   metric->service = "health/process/start";
   metric->metric = 1.0;
+  metric->meta->app->user = user;
+  metric->meta->app->name = name;
+
   estragon_send(metric);
   estragon_free_metric(metric);
 }
@@ -118,6 +129,8 @@ int start_init(estragon_plugin_t* plugin) {
   plugin->stdout_data_cb = start__on_stdout_data;
   plugin->stderr_data_cb = start__on_stderr_data;
 
+  user = saneopt_get(plugin->saneopt, "app-user");
+  name = saneopt_get(plugin->saneopt, "app-name");
 
   return 0;
 }
