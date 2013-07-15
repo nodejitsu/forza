@@ -139,6 +139,7 @@ estragon_metric_t* estragon_new_metric() {
 }
 
 void estragon_free_metric(estragon_metric_t* metric) {
+  free(metric->meta->app);
   free(metric->meta);
   free(metric);
 }
