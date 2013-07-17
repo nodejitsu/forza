@@ -9,26 +9,6 @@
 
 int __interposed_ipc = 3;
 
-/* __attribute__((constructor)) static void __interposed_init() { */
-/*   struct sockaddr_un address; */
-/*   char* ipc_fd = getenv("INTERPOSED_IPC"); */
-/*  */
-/*   if (ipc_fd == NULL) { */
-/*     ipc_fd = "3"; */
-/*   } */
-/*  */
-/*   __interposed_ipc = socket(PF_UNIX, SOCK_STREAM, 0); */
-/*   if (__interposed_ipc < 0) { */
-/*     perror("socket(PF_UNIX, SOCK_STREAM, 0)"); */
-/*     return; */
-/*   } */
-/*  */
-/*   memset(&address, 0, sizeof(struct sockaddr_un)); */
-/*   address.sun_family = AF_UNIX; */
-/*   snprintf(address.sun_path, sizeof(address.sun_path) - 1, "%s", ipc_fd); */
-/*   connect(__interposed_ipc, (struct sockaddr*) &address, sizeof(struct sockaddr_un)); */
-/* } */
-
 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
   int result;
   char msg[128];
