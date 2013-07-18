@@ -14,6 +14,10 @@ config = ''
 
 parser = argparse.ArgumentParser(description='Configure `estragon` build.')
 parser.add_argument('--with-plugin', action='append')
+parser.add_argument('--dest-cpu',
+                    action='store',
+                    dest='dest_cpu',
+                    help='CPU architecture to build for. Valid values are: ia32, x64')
 args = parser.parse_args()
 
 if os.path.isdir('.git'):
@@ -37,6 +41,16 @@ for plugin in plugins:
 plugins_h += 'int (*_plugin_init_calls[PLUGIN_COUNT])(estragon_plugin_t* plugin) = { '
 plugins_h += ', '.join(plugin + '_init' for plugin in plugins) + ' };\n'
 plugins_h += '#endif\n'
+
+arch = args.dest_cpu
+if arch:
+    if arch == 'ia32':
+        config += 'CFLAGS += -m32'
+    elif arch == 'x64':
+        config += 'CFLAGS += -m64'
+    else:
+        print 'Valid values for `--dest-cpu` option are: ia32, x64'
+        sys.exit(1)
 
 f = open('config.mk', 'w')
 f.write(config + '\n')

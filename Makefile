@@ -4,7 +4,7 @@ OBJS += src/estragon.o
 OBJS += src/connect.o
 OBJS += src/json.o
 
-CFLAGS=-g -Wall -Ideps/libuv/include -Ideps/saneopt/include -Ideps/env/include -Iinclude
+CFLAGS += -g -Wall -Ideps/libuv/include -Ideps/saneopt/include -Ideps/env/include -Iinclude
 ifdef $(ESTRAGON_VERSION_HASH)
   CFLAGS += -DESTRAGON_VERSION_HASH='"$(ESTRAGON_VERSION_HASH)"'
 endif
@@ -47,7 +47,7 @@ libenv:
 
 ifeq (Darwin, $(uname_S))
 libinterposed: src/plugins/start/libinterposed.c
-	gcc -dynamiclib -o libinterposed.dylib $^
+	gcc $(CFLAGS) -dynamiclib -o libinterposed.dylib $^
 else
 libinterposed: src/plugins/start/libinterposed.c
 	gcc $(CFLAGS) -D_GNU_SOURCE -fPIC -shared -o libinterposed.so $^
