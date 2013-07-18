@@ -14,9 +14,9 @@ config = ''
 
 parser = argparse.ArgumentParser(description='Configure `estragon` build.')
 parser.add_argument('--with-plugin', action='append')
-parser.add_argument('--dest-cpu',
+parser.add_argument('--interposed-dest-cpu',
                     action='store',
-                    dest='dest_cpu',
+                    dest='interposed_dest_cpu',
                     help='CPU architecture to build for. Valid values are: ia32, x64')
 args = parser.parse_args()
 
@@ -42,7 +42,7 @@ plugins_h += 'int (*_plugin_init_calls[PLUGIN_COUNT])(estragon_plugin_t* plugin)
 plugins_h += ', '.join(plugin + '_init' for plugin in plugins) + ' };\n'
 plugins_h += '#endif\n'
 
-arch = args.dest_cpu
+arch = args.interposed_dest_cpu
 if arch:
     match = {
         'ia32': '-m32',
@@ -50,11 +50,10 @@ if arch:
     }
 
     if not match[arch]:
-        print 'Valid values for `--dest-cpu` option are: ia32, x64'
+        print 'Valid values for `--interposed-dest-cpu` option are: ia32, x64'
         sys.exit(1)
 
-    config += 'LDFLAGS += ' + match[arch] + '\n'
-    config += 'CFLAGS += ' + match[arch] + '\n'
+    config += 'INTERPOSED_CFLAGS += ' + match[arch] + '\n'
 
 f = open('config.mk', 'w')
 f.write(config + '\n')

@@ -47,10 +47,10 @@ libenv:
 
 ifeq (Darwin, $(uname_S))
 libinterposed: src/plugins/start/libinterposed.c
-	gcc $(CFLAGS) -dynamiclib -o libinterposed.dylib $^
+	gcc $(INTERPOSED_CFLAGS) $(CFLAGS) -dynamiclib -o libinterposed.dylib $^
 else
 libinterposed: src/plugins/start/libinterposed.c
-	gcc $(CFLAGS) -D_GNU_SOURCE -fPIC -shared -o libinterposed.so $^
+	gcc $(INTERPOSED_CFLAGS) $(CFLAGS) -D_GNU_SOURCE -fPIC -shared -o libinterposed.so $^
 endif
 
 clean:
