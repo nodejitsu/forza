@@ -12,15 +12,15 @@ endif
 uname_S=$(shell uname -s)
 
 ifeq (Darwin, $(uname_S))
-  LDFLAGS=-framework CoreServices
+  LDFLAGS += -framework CoreServices
 endif
 
 ifeq (Linux, $(uname_S))
-  LDFLAGS=-lc -lrt -ldl -lm -lpthread
+  LDFLAGS += -lc -lrt -ldl -lm -lpthread
 endif
 
 ifeq (SunOS, $(uname_S))
-  LDFLAGS=-lsendfile -lsocket -lkstat -lnsl -lm
+  LDFLAGS += -lsendfile -lsocket -lkstat -lnsl -lm
 endif
 
 all: libuv libsaneopt libenv estragon

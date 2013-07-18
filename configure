@@ -44,13 +44,17 @@ plugins_h += '#endif\n'
 
 arch = args.dest_cpu
 if arch:
-    if arch == 'ia32':
-        config += 'CFLAGS += -m32'
-    elif arch == 'x64':
-        config += 'CFLAGS += -m64'
-    else:
+    match = {
+        'ia32': '-m32',
+        'x64': '-m64'
+    }
+
+    if not match[arch]:
         print 'Valid values for `--dest-cpu` option are: ia32, x64'
         sys.exit(1)
+
+    config += 'LDFLAGS += ' + match[arch] + '\n'
+    config += 'CFLAGS += ' + match[arch] + '\n'
 
 f = open('config.mk', 'w')
 f.write(config + '\n')
