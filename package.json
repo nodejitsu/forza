@@ -1,6 +1,6 @@
 {
   "name": "estragon",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "devDependencies": {
     "json-stream": "0.2.x",
     "assert-called": "0.1.x",
