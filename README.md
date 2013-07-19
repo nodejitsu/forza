@@ -3,9 +3,10 @@ The Monitoring Agent.
 
 ## Build
 
-### `./configure options`
+### `./configure` options
 
   * `--with-plugin <plugin>` - enable plugin `<plugin>` (see Plugins section)
+  * `--interposed-dest-cpu` - CPU architecture to build `libinterposed` for. Valid values are: ia32 and x64.
 
 ```bash
 ./configure
@@ -26,7 +27,6 @@ Sends:
 ```json
 {
   "metric": <seconds of process uptime>,
-  "host": "pc09.local",
   "service": "health/process/uptime"
 }
 ```
@@ -38,8 +38,19 @@ Sends:
 ```json
 {
   "metric": <used-memory-on-the-machine>,
-  "host": "pc09.local",
-  "service":"health/machine/memory"
+  "service": "health/machine/memory"
+}
+```
+
+### `logs`
+
+Sends:
+
+```json
+{
+  "metric": 1.0,
+  "service": "logs/stdout",
+  "description": <log-message>
 }
 ```
 
@@ -48,7 +59,6 @@ Sends:
 Tests require all plugins:
 
 ```bash
-./configure --with-plugin uptime --with-plugin mem --with-plugin cpu --with-plugin process --with-plugin heartbeat --with-plugin port --with-plugin logs
-make
+./build
 npm test
 ```
