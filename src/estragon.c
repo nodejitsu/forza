@@ -166,12 +166,16 @@ void on_connect(int status) {
   spawn();
 }
 
-void estragon__on_exit() {
-  //
-  // Make best effort to kill the child process before we exit to ensure
-  // consistency.
-  //
+void estragon__kill() {
+  printf("killing child...\n");
   uv_process_kill(child, SIGKILL);
+}
+
+void estragon__on_sigterm() {
+  //
+  // If `exit` is called explicitely, `atexit` handler is invoked.
+  //
+  exit(1);
 }
 
 int main(int argc, char *argv[]) {
@@ -181,7 +185,8 @@ int main(int argc, char *argv[]) {
   uv_interface_address_t* addresses;
   uv_err_t err;
 
-  atexit(estragon__on_exit);
+  atexit(estragon__kill);
+  signal(SIGTERM, estragon__on_sigterm);
 
   loop = uv_default_loop();
 
