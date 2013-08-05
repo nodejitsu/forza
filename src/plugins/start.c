@@ -8,7 +8,7 @@
 
 #define PATHMAX 1024
 
-static char* buffer;
+static char* buffer = NULL;
 static size_t buffer_len = 0;
 static int started = 0;
 
@@ -76,20 +76,12 @@ void start__timeout(uv_timer_t* timer, int status) {
   start__failure();
 }
 
-void start__on_data(char* data, estragon__stdio_type_t type) {
+void start__on_data(char* data) {
   size_t len = strlen(data);
 
   buffer_len += len;
   buffer = realloc(buffer, buffer_len + 1);
   strncat(buffer, data, len);
-}
-
-void start__on_stdout_data(char* data) {
-  start__on_data(data, STDIO_STDOUT);
-}
-
-void start__on_stderr_data(char* data) {
-  start__on_data(data, STDIO_STDERR);
 }
 
 void start__process_spawned_cb(uv_process_t* process, uv_process_options_t* options) {
@@ -126,8 +118,8 @@ int start_init(estragon_plugin_t* plugin) {
   plugin->ipc_data_cb = start__on_ipc_data;
   plugin->process_spawned_cb = start__process_spawned_cb;
   plugin->process_exit_cb = start__process_exit_cb;
-  plugin->stdout_data_cb = start__on_stdout_data;
-  plugin->stderr_data_cb = start__on_stderr_data;
+  plugin->stdout_data_cb = start__on_data;
+  plugin->stderr_data_cb = start__on_data;
 
   user = saneopt_get(plugin->saneopt, "app-user");
   name = saneopt_get(plugin->saneopt, "app-name");
