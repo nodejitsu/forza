@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-./configure --with-plugin uptime --with-plugin mem --with-plugin cpu --with-plugin process --with-plugin heartbeat --with-plugin logs --with-plugin start --interposed-dest-cpu x64
+./configure --with-plugin uptime --with-plugin mem --with-plugin cpu --with-plugin process --with-plugin heartbeat --with-plugin logs --with-plugin start --interposed-dest-cpu ia32
 gmake || make
