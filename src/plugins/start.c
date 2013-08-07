@@ -124,5 +124,8 @@ int start_init(estragon_plugin_t* plugin) {
   user = saneopt_get(plugin->saneopt, "app-user");
   name = saneopt_get(plugin->saneopt, "app-name");
 
+  buffer = malloc(sizeof(char) * 1);
+  buffer[0] = '\0';
+
   return 0;
 }
