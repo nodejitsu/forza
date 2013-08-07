@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <estragon.h>
+#include <forza.h>
 
-char* estragon__json_escape(char* string) {
+char* forza__json_escape(char* string) {
   char* result = malloc((2 * strlen(string) + 1) * sizeof(char));
 
   if (result == NULL) {
@@ -31,7 +31,7 @@ char* estragon__json_escape(char* string) {
   return result;
 }
 
-void estragon__json_append(char** string, const char* property, char* value, int prepend_comma) {
+void forza__json_append(char** string, const char* property, char* value, int prepend_comma) {
   // This is going to leak *so* bad.
   int property_length = strlen(property);
   int value_length = strlen(value);
@@ -47,8 +47,8 @@ void estragon__json_append(char** string, const char* property, char* value, int
   strncat(*string, value, value_length);
 }
 
-char* estragon__json_stringify_string(char* string) {
-  char* escaped = estragon__json_escape(string);
+char* forza__json_stringify_string(char* string) {
+  char* escaped = forza__json_escape(string);
   char* out;
   size_t length;
 
@@ -75,19 +75,19 @@ char* estragon__json_stringify_string(char* string) {
   return out;
 }
 
-char* estragon__json_stringify_meta_app(estragon_metric_meta_app_t* app) {
+char* forza__json_stringify_meta_app(forza_metric_meta_app_t* app) {
   char* json = malloc(2);
   char* buf;
 
   json[0] = '{';
   json[1] = '\0';
 
-  buf = estragon__json_stringify_string(app->user);
-  estragon__json_append(&json, "user", buf, 0);
+  buf = forza__json_stringify_string(app->user);
+  forza__json_append(&json, "user", buf, 0);
   free(buf);
 
-  buf = estragon__json_stringify_string(app->name);
-  estragon__json_append(&json, "name", buf, 1);
+  buf = forza__json_stringify_string(app->name);
+  forza__json_append(&json, "name", buf, 1);
   free(buf);
 
   json = realloc(json, strlen(json) + 2);
@@ -96,7 +96,7 @@ char* estragon__json_stringify_meta_app(estragon_metric_meta_app_t* app) {
   return json;
 }
 
-char* estragon__json_stringify_meta(estragon_metric_meta_t* meta) {
+char* forza__json_stringify_meta(forza_metric_meta_t* meta) {
   char* json = malloc(2);
   char* app;
   char buf[128];
@@ -107,17 +107,17 @@ char* estragon__json_stringify_meta(estragon_metric_meta_t* meta) {
 
   if (meta->uptime != ((long long int) - 1)) {
     snprintf(buf, sizeof(buf), "%lld", meta->uptime);
-    estragon__json_append(&json, "uptime", buf, first++);
+    forza__json_append(&json, "uptime", buf, first++);
   }
 
   if (meta->port != ((unsigned short) - 1)) {
     snprintf(buf, sizeof(buf), "%hu", meta->port);
-    estragon__json_append(&json, "port", buf, first++);
+    forza__json_append(&json, "port", buf, first++);
   }
 
   if (meta->app->user != NULL && meta->app->name != NULL) {
-    app = estragon__json_stringify_meta_app(meta->app);
-    estragon__json_append(&json, "app", app, first++);
+    app = forza__json_stringify_meta_app(meta->app);
+    forza__json_append(&json, "app", app, first++);
     free(app);
   }
 
@@ -127,7 +127,7 @@ char* estragon__json_stringify_meta(estragon_metric_meta_t* meta) {
   return json;
 }
 
-char* estragon_json_stringify(estragon_metric_t* metric) {
+char* forza_json_stringify(forza_metric_t* metric) {
   char* json = malloc(2);
   char buf[128];
   char* str_buf;
@@ -137,29 +137,29 @@ char* estragon_json_stringify(estragon_metric_t* metric) {
   json[1] = '\0';
 
   snprintf(buf, sizeof(buf), "%.8f", metric->metric);
-  estragon__json_append(&json, "metric", buf, 0);
+  forza__json_append(&json, "metric", buf, 0);
 
   snprintf(buf, sizeof(buf), "%lu", metric->time);
-  estragon__json_append(&json, "time", buf, 1);
+  forza__json_append(&json, "time", buf, 1);
 
-  str_buf = estragon__json_stringify_string(metric->host);
-  estragon__json_append(&json, "host", str_buf, 1);
+  str_buf = forza__json_stringify_string(metric->host);
+  forza__json_append(&json, "host", str_buf, 1);
   free(str_buf);
 
   if (metric->description) {
-    str_buf = estragon__json_stringify_string(metric->description);
-    estragon__json_append(&json, "description", str_buf, 1);
+    str_buf = forza__json_stringify_string(metric->description);
+    forza__json_append(&json, "description", str_buf, 1);
     free(str_buf);
   }
 
   if (metric->service) {
-    str_buf = estragon__json_stringify_string(metric->service);
-    estragon__json_append(&json, "service", str_buf, 1);
+    str_buf = forza__json_stringify_string(metric->service);
+    forza__json_append(&json, "service", str_buf, 1);
     free(str_buf);
   }
 
-  str_buf = estragon__json_stringify_meta(metric->meta);
-  estragon__json_append(&json, "meta", str_buf, 1);
+  str_buf = forza__json_stringify_meta(metric->meta);
+  forza__json_append(&json, "meta", str_buf, 1);
   free(str_buf);
 
   json = realloc(json, strlen(json) + 3);

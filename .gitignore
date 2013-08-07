@@ -1,8 +1,8 @@
-estragon
+forza
 *.o
 *.sw[op]
 config.mk
-include/estragon-private/plugins.h
+include/forza-private/plugins.h
 libinterposed.*
 !src/plugins/start/libinterposed.c
 node_modules

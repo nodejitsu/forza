@@ -1,4 +1,4 @@
-# estragon
+# forza
 The Monitoring Agent.
 
 ## Build
@@ -15,7 +15,7 @@ make
 
 ## Usage
 ```bash
-./estragon -h 127.0.0.1:1337 -- node test/fixtures/listen.js
+./forza -h 127.0.0.1:1337 -- node test/fixtures/listen.js
 ```
 
 ## Plugins

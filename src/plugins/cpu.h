@@ -1,8 +1,8 @@
 #ifndef _CPU_H
 #define _CPU_H
 
-#include <estragon.h>
+#include <forza.h>
 
-int cpu_init(estragon_plugin_t* plugin);
+int cpu_init(forza_plugin_t* plugin);
 
 #endif

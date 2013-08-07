@@ -5,7 +5,7 @@
 
 #include <uv.h>
 
-#include <estragon.h>
+#include <forza.h>
 
 static char* hostname;
 static uv_tcp_t client;
@@ -15,11 +15,11 @@ static uv_connect_t connect_req;
 static int host_index = -1;
 static char** hosts;
 
-void estragon__on_connect(uv_connect_t* req, int status);
-void estragon__reconnect_on_close(uv_handle_t* handle);
-void estragon__reconnect_on_connect_error(uv_handle_t* handle);
+void forza__on_connect(uv_connect_t* req, int status);
+void forza__reconnect_on_close(uv_handle_t* handle);
+void forza__reconnect_on_connect_error(uv_handle_t* handle);
 
-void estragon__reconnect(estragon_connect_cb connect_cb) {
+void forza__reconnect(forza_connect_cb connect_cb) {
   char* pair;
   char* port_sep;
   char host[16];
@@ -50,7 +50,7 @@ void estragon__reconnect(estragon_connect_cb connect_cb) {
   /* Set up a TCP keepalive connection to the godot server */
   uv_tcp_init(loop, &client);
   uv_tcp_keepalive(&client, 1, 180);
-  r = uv_tcp_connect(&connect_req, &client, addr, estragon__on_connect);
+  r = uv_tcp_connect(&connect_req, &client, addr, forza__on_connect);
 
   if (r != 0) {
     //
@@ -64,61 +64,61 @@ void estragon__reconnect(estragon_connect_cb connect_cb) {
     // In all of those cases we should try the next host and reconnect.
     //
     fprintf(stderr, "connect error: %s\n", uv_strerror(uv_last_error(loop)));
-    estragon__reconnect((estragon_connect_cb) connect_req.data);
+    forza__reconnect((forza_connect_cb) connect_req.data);
     return;
   }
 }
 
-void estragon_connect(char** hosts_, char* hostname_, estragon_connect_cb connect_cb) {
+void forza_connect(char** hosts_, char* hostname_, forza_connect_cb connect_cb) {
   /* Get the hostname so that it can be provided to the server */
   hostname = hostname_;
   hosts = hosts_;
-  estragon__reconnect(connect_cb);
+  forza__reconnect(connect_cb);
 }
 
-void estragon__on_connect(uv_connect_t* req, int status) {
+void forza__on_connect(uv_connect_t* req, int status) {
   if (status != 0) {
     fprintf(stderr, "connect error: %s\n", uv_strerror(uv_last_error(loop)));
-    uv_close((uv_handle_t*) &client, estragon__reconnect_on_connect_error);
+    uv_close((uv_handle_t*) &client, forza__reconnect_on_connect_error);
     return;
   }
 
   printf("connected.\n");
 
   if (req->data != NULL) {
-    ((estragon_connect_cb) req->data)(status);
+    ((forza_connect_cb) req->data)(status);
   }
 }
 
-void estragon__reconnect_on_close(uv_handle_t* handle) {
-  estragon__reconnect(NULL);
+void forza__reconnect_on_close(uv_handle_t* handle) {
+  forza__reconnect(NULL);
 }
 
-void estragon__reconnect_on_connect_error(uv_handle_t* handle) {
-  estragon_connect_cb cb = (connect_req.data != NULL)
-    ? ((estragon_connect_cb) connect_req.data)
+void forza__reconnect_on_connect_error(uv_handle_t* handle) {
+  forza_connect_cb cb = (connect_req.data != NULL)
+    ? ((forza_connect_cb) connect_req.data)
     : NULL;
-  estragon__reconnect(cb);
+  forza__reconnect(cb);
 }
 
-void estragon__on_write(uv_write_t* req, int status) {
+void forza__on_write(uv_write_t* req, int status) {
   if (status) {
     fprintf(stderr, "write error: %s\n", uv_strerror(uv_last_error(loop)));
 
     if (!uv_is_closing((uv_handle_t*) &client)) {
-      uv_close((uv_handle_t*) &client, estragon__reconnect_on_close);
+      uv_close((uv_handle_t*) &client, forza__reconnect_on_close);
     }
   }
   free(req);
 }
 
-estragon_metric_t* estragon_new_metric() {
-  estragon_metric_t* metric = malloc(sizeof(estragon_metric_t));
+forza_metric_t* forza_new_metric() {
+  forza_metric_t* metric = malloc(sizeof(forza_metric_t));
   if (metric == NULL) {
     return NULL;
   }
 
-  metric->meta = malloc(sizeof(estragon_metric_meta_t));
+  metric->meta = malloc(sizeof(forza_metric_meta_t));
   if (metric->meta == NULL) {
     free(metric);
     return NULL;
@@ -131,20 +131,20 @@ estragon_metric_t* estragon_new_metric() {
   metric->meta->uptime = (long long int) - 1;
   metric->meta->port = (unsigned short) - 1;
 
-  metric->meta->app = malloc(sizeof(estragon_metric_meta_app_t));
+  metric->meta->app = malloc(sizeof(forza_metric_meta_app_t));
   metric->meta->app->user = NULL;
   metric->meta->app->name = NULL;
 
   return metric;
 }
 
-void estragon_free_metric(estragon_metric_t* metric) {
+void forza_free_metric(forza_metric_t* metric) {
   free(metric->meta->app);
   free(metric->meta);
   free(metric);
 }
 
-void estragon_send(estragon_metric_t* metric) {
+void forza_send(forza_metric_t* metric) {
   int r;
   uv_buf_t send_buf;
   uv_stream_t *stream;
@@ -161,13 +161,13 @@ void estragon_send(estragon_metric_t* metric) {
     metric->time = time(NULL);
   }
 
-  json_data = estragon_json_stringify(metric);
+  json_data = forza_json_stringify(metric);
 
   write_req = malloc(sizeof *write_req);
   send_buf = uv_buf_init(json_data, sizeof(char) * strlen(json_data));
   stream = connect_req.handle;
 
-  r = uv_write(write_req, stream, &send_buf, 1, estragon__on_write);
+  r = uv_write(write_req, stream, &send_buf, 1, forza__on_write);
   if (r) {
     fprintf(stderr, "uv_write: %s\n", uv_strerror(uv_last_error(loop)));
     return;
@@ -175,6 +175,6 @@ void estragon_send(estragon_metric_t* metric) {
   free(json_data);
 }
 
-void estragon_close() {
+void forza_close() {
   uv_close((uv_handle_t*) &client, NULL);
 }

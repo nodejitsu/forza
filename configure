@@ -12,7 +12,7 @@ def unique(l):
 
 config = ''
 
-parser = argparse.ArgumentParser(description='Configure `estragon` build.')
+parser = argparse.ArgumentParser(description='Configure `forza` build.')
 parser.add_argument('--with-plugin', action='append')
 parser.add_argument('--interposed-dest-cpu',
                     action='store',
@@ -22,23 +22,23 @@ args = parser.parse_args()
 
 if os.path.isdir('.git'):
     version = subprocess.check_output(['git', 'log', '-n1', '--pretty=%h'])
-    config += 'ESTRAGON_VERSION_HASH = ' + version
+    config += 'FORZA_VERSION_HASH = ' + version
 
 plugins = unique(args.with_plugin or ['heartbeat'])
 
-print 'Building `estragon` with plugins: ' + ', '.join(plugins)
+print 'Building `forza` with plugins: ' + ', '.join(plugins)
 
 plugins_h = ''
 plugins_h += '#ifndef _PLUGINS_H\n'
 plugins_h += '#define _PLUGINS_H\n'
-plugins_h += '#include <estragon.h>\n'
+plugins_h += '#include <forza.h>\n'
 plugins_h += '#define PLUGIN_COUNT ' + str(len(plugins)) + '\n'
 
 for plugin in plugins:
     config += 'OBJS += src/plugins/' + plugin + '.o\n'
     plugins_h += '#include "../../src/plugins/' + plugin + '.h"\n'
 
-plugins_h += 'int (*_plugin_init_calls[PLUGIN_COUNT])(estragon_plugin_t* plugin) = { '
+plugins_h += 'int (*_plugin_init_calls[PLUGIN_COUNT])(forza_plugin_t* plugin) = { '
 plugins_h += ', '.join(plugin + '_init' for plugin in plugins) + ' };\n'
 plugins_h += '#endif\n'
 
@@ -59,6 +59,6 @@ f = open('config.mk', 'w')
 f.write(config + '\n')
 f.close()
 
-f = open('include/estragon-private/plugins.h', 'w')
+f = open('include/forza-private/plugins.h', 'w')
 f.write(plugins_h)
 f.close()

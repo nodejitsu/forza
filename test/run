@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "Running estragon test suite"
+echo "Running forza test suite"
 
 passed=0
 failed=0

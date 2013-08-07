@@ -1,8 +1,8 @@
 #ifndef _UPTIME_H
 #define _UPTIME_H
 
-#include <estragon.h>
+#include <forza.h>
 
-int uptime_init(estragon_plugin_t* plugin);
+int uptime_init(forza_plugin_t* plugin);
 
 #endif

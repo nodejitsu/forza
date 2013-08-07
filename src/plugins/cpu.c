@@ -1,5 +1,5 @@
 #include <uv.h>
-#include <estragon.h>
+#include <forza.h>
 
 #ifdef __sun
 #include <sys/pset.h>
@@ -10,7 +10,7 @@ static uv_timer_t cpu_timer;
 
 void cpu__send_usage(uv_timer_t *timer, int status) {
   double loadinfo[3];
-  estragon_metric_t* metric = estragon_new_metric();
+  forza_metric_t* metric = forza_new_metric();
 
 #ifdef DEBUG
   printf("cpu usage timer fired, status %d\n", status);
@@ -25,16 +25,16 @@ void cpu__send_usage(uv_timer_t *timer, int status) {
 
   metric->service = "health/machine/cpu";
   metric->metric = loadinfo[0];
-  estragon_send(metric);
+  forza_send(metric);
 
-  estragon_free_metric(metric);
+  forza_free_metric(metric);
 }
 
 void cpu__process_exit_cb(int exit_status, int term_signal) {
   uv_timer_stop(&cpu_timer);
 }
 
-int cpu_init(estragon_plugin_t* plugin) {
+int cpu_init(forza_plugin_t* plugin) {
   plugin->process_exit_cb = cpu__process_exit_cb;
 
   uv_timer_init(uv_default_loop(), &cpu_timer);

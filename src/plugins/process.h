@@ -1,8 +1,8 @@
 #ifndef _PROCESS_H
 #define _PROCESS_H
 
-#include <estragon.h>
+#include <forza.h>
 
-int process_init(estragon_plugin_t* plugin);
+int process_init(forza_plugin_t* plugin);
 
 #endif
