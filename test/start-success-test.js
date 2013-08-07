@@ -33,7 +33,7 @@ var server = net.createServer(cb(function (socket) {
 
 server.listen(PORT, cb(function () {
   child = spawn(
-    path.join(__dirname, '..', 'estragon'),
+    path.join(__dirname, '..', 'forza'),
     [
       '-h', '127.0.0.1:' + PORT.toString(), '--app-name', 'test-app', '--app-user', 'maciej',
       '--', 'node', path.join(__dirname, 'fixtures', 'listen.js')

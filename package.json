@@ -1,5 +1,5 @@
 {
-  "name": "estragon",
+  "name": "forza",
   "version": "0.0.16",
   "devDependencies": {
     "json-stream": "0.2.x",
@@ -11,7 +11,7 @@
     "preinstall": "./build"
   },
   "bin": {
-    "estragon": "estragon"
+    "forza": "forza"
   },
   "publishConfig": {
     "registry": "http://reg.njitsu.net:5984"

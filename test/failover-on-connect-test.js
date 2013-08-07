@@ -26,7 +26,7 @@ var server = net.createServer(cb(function (socket) {
 
 server.listen(PORT, function () {
   var child = spawn(
-    path.join(__dirname, '..', 'estragon'),
+    path.join(__dirname, '..', 'forza'),
     [
       '-h', '127.0.0.1:' + (PORT - 2).toString(),
       '-h', '127.0.0.1:' + (PORT - 1).toString(),

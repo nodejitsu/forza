@@ -1,26 +1,26 @@
 #include <time.h>
 #include <uv.h>
-#include <estragon.h>
+#include <forza.h>
 
 static uv_timer_t uptime_timer;
 time_t start_time;
 
 void uptime__send_uptime(uv_timer_t *timer, int status) {
-  estragon_metric_t* metric = estragon_new_metric();
+  forza_metric_t* metric = forza_new_metric();
   time_t now = time(NULL);
 
   metric->service = "health/process/uptime";
   metric->metric = (double) (now - start_time);
-  estragon_send(metric);
+  forza_send(metric);
 
-  estragon_free_metric(metric);
+  forza_free_metric(metric);
 }
 
 void uptime__process_exit_cb(int exit_status, int term_singal) {
   uv_timer_stop(&uptime_timer);
 }
 
-int uptime_init(estragon_plugin_t* plugin) {
+int uptime_init(forza_plugin_t* plugin) {
   start_time = time(NULL);
 
   //

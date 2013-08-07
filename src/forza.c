@@ -7,13 +7,13 @@
 #include <env.h>
 #include <saneopt.h>
 
-#include <estragon.h>
-#include <estragon-private/plugins.h>
+#include <forza.h>
+#include <forza-private/plugins.h>
 
 static uv_loop_t *loop;
 extern char** environ;
 
-estragon_plugin_t plugins[PLUGIN_COUNT];
+forza_plugin_t plugins[PLUGIN_COUNT];
 char** arguments;
 
 //
@@ -36,15 +36,15 @@ void on_process_exit(uv_process_t* process, int exit_status, int term_signal) {
     }
   }
 
-  estragon_close();
+  forza_close();
   uv_close((uv_handle_t*) process, NULL);
 }
 
-static uv_buf_t estragon__on_alloc(uv_handle_t* handle, size_t suggested_size) {
+static uv_buf_t forza__on_alloc(uv_handle_t* handle, size_t suggested_size) {
   return uv_buf_init((char*) malloc(suggested_size), suggested_size);
 }
 
-void estragon__on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, estragon__stdio_type_t type) {
+void forza__on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, forza__stdio_type_t type) {
   int i;
   char* data;
 
@@ -75,16 +75,16 @@ void estragon__on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf, estragon
   free(data);
 }
 
-void estragon__on_stdout_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
-  estragon__on_read(tcp, nread, rdbuf, STDIO_STDOUT);
+void forza__on_stdout_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+  forza__on_read(tcp, nread, rdbuf, STDIO_STDOUT);
 }
 
-void estragon__on_stderr_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
-  estragon__on_read(tcp, nread, rdbuf, STDIO_STDERR);
+void forza__on_stderr_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+  forza__on_read(tcp, nread, rdbuf, STDIO_STDERR);
 }
 
-void estragon__on_ipc_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
-  estragon__on_read(tcp, nread, rdbuf, STDIO_IPC);
+void forza__on_ipc_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t rdbuf) {
+  forza__on_read(tcp, nread, rdbuf, STDIO_IPC);
 }
 
 void spawn() {
@@ -141,9 +141,9 @@ void spawn() {
     }
   }
 
-  uv_read_start(options.stdio[1].data.stream, estragon__on_alloc, estragon__on_stdout_read);
-  uv_read_start(options.stdio[2].data.stream, estragon__on_alloc, estragon__on_stderr_read);
-  uv_read_start(options.stdio[3].data.stream, estragon__on_alloc, estragon__on_ipc_read);
+  uv_read_start(options.stdio[1].data.stream, forza__on_alloc, forza__on_stdout_read);
+  uv_read_start(options.stdio[2].data.stream, forza__on_alloc, forza__on_stderr_read);
+  uv_read_start(options.stdio[3].data.stream, forza__on_alloc, forza__on_ipc_read);
 }
 
 void on_connect(int status) {
@@ -166,12 +166,12 @@ void on_connect(int status) {
   spawn();
 }
 
-void estragon__kill() {
+void forza__kill() {
   printf("killing child...\n");
   uv_process_kill(child, SIGKILL);
 }
 
-void estragon__on_sigterm() {
+void forza__on_sigterm() {
   //
   // If `exit` is called explicitely, `atexit` handler is invoked.
   //
@@ -185,15 +185,15 @@ int main(int argc, char *argv[]) {
   uv_interface_address_t* addresses;
   uv_err_t err;
 
-  atexit(estragon__kill);
-  signal(SIGTERM, estragon__on_sigterm);
+  atexit(forza__kill);
+  signal(SIGTERM, forza__on_sigterm);
 
   loop = uv_default_loop();
 
-#ifdef ESTRAGON_VERSION_HASH
-  printf("estragon "ESTRAGON_VERSION_HASH"\n");
+#ifdef FORZA_VERSION_HASH
+  printf("forza "FORZA_VERSION_HASH"\n");
 #else
-  printf("estragon\n");
+  printf("forza\n");
 #endif
 
   opt = saneopt_init(argc - 1, argv + 1);
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
     uv_free_interface_addresses(addresses, c);
   }
 
-  estragon_connect(hosts, hostname, on_connect);
+  forza_connect(hosts, hostname, on_connect);
 
   uv_run(loop, UV_RUN_DEFAULT);
 

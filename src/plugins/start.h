@@ -1,8 +1,8 @@
 #ifndef _START_H
 #define _START_H
 
-#include <estragon.h>
+#include <forza.h>
 
-int start_init(estragon_plugin_t* plugin);
+int start_init(forza_plugin_t* plugin);
 
 #endif

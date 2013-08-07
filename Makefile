@@ -1,12 +1,12 @@
 -include config.mk
 
-OBJS += src/estragon.o
+OBJS += src/forza.o
 OBJS += src/connect.o
 OBJS += src/json.o
 
 CFLAGS += -g -Wall -Ideps/libuv/include -Ideps/saneopt/include -Ideps/env/include -Iinclude
-ifdef $(ESTRAGON_VERSION_HASH)
-  CFLAGS += -DESTRAGON_VERSION_HASH='"$(ESTRAGON_VERSION_HASH)"'
+ifdef $(FORZA_VERSION_HASH)
+  CFLAGS += -DFORZA_VERSION_HASH='"$(FORZA_VERSION_HASH)"'
 endif
 
 uname_S=$(shell uname -s)
@@ -23,9 +23,9 @@ ifeq (SunOS, $(uname_S))
   LDFLAGS += -lsendfile -lsocket -lkstat -lnsl -lm
 endif
 
-all: libuv libsaneopt libenv estragon
+all: libuv libsaneopt libenv forza
 
-src/%.o: src/%.c include/estragon-private/plugins.h
+src/%.o: src/%.c include/forza-private/plugins.h
 	gcc $(CFLAGS) -c $< -o $@
 
 src/plugins/%.o: src/plugins/%.c
@@ -33,7 +33,7 @@ src/plugins/%.o: src/plugins/%.c
 
 src/plugins/start.o: libinterposed
 
-estragon: $(OBJS)
+forza: $(OBJS)
 	gcc $^ deps/libuv/libuv.a deps/saneopt/libsaneopt.a deps/env/libenv.a $(LDFLAGS) -o $@
 
 libuv:
@@ -54,10 +54,10 @@ libinterposed: src/plugins/start/libinterposed.c
 endif
 
 clean:
-	rm -f estragon
+	rm -f forza
 
 cleanall:
-	rm -f estragon
+	rm -f forza
 	$(MAKE) clean -C deps/libuv/
 	$(MAKE) clean -C deps/saneopt/
 	$(MAKE) clean -C deps/env/

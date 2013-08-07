@@ -7,7 +7,7 @@ var net = require('net'),
 
 var got = false,
     PORT = 5435,
-    HOSTNAME = 'estragon-test',
+    HOSTNAME = 'forza-test',
     child;
 
 process.on('exit', function () {
@@ -31,7 +31,7 @@ var server = net.createServer(cb(function (socket) {
 
 server.listen(PORT, function () {
   child = spawn(
-    path.join(__dirname, '..', 'estragon'),
+    path.join(__dirname, '..', 'forza'),
     [ 
       '-h', '127.0.0.1:' + PORT.toString(),
       '--hostname', HOSTNAME,

@@ -31,7 +31,7 @@ var server = net.createServer(cb(function (socket) {
 
 server.listen(PORT, cb(function () {
   var child = spawn(
-    path.join(__dirname, '..', 'estragon'),
+    path.join(__dirname, '..', 'forza'),
     [
       '-h', '127.0.0.1:' + PORT.toString(), '--app-name', 'test-app', '--app-user', 'maciej',
       '--', 'node', path.join(__dirname, 'fixtures', 'exit-after-1-s.js')

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <uv.h>
-#include <estragon.h>
+#include <forza.h>
 #include <saneopt.h>
 
 #define PATHMAX 1024
@@ -22,19 +22,19 @@ static char* name;
 
 void start__on_ipc_data(char* data) {
   unsigned short port;
-  estragon_metric_t* metric;
+  forza_metric_t* metric;
 
   if (sscanf(data, "port=%hu\n", &port) == 1) {
-    metric = estragon_new_metric();
+    metric = forza_new_metric();
     metric->metric = 1.0;
     metric->service = "health/process/start";
     metric->meta->port = port;
     metric->meta->app->user = user;
     metric->meta->app->name = name;
 
-    estragon_send(metric);
+    forza_send(metric);
 
-    estragon_free_metric(metric);
+    forza_free_metric(metric);
   }
 }
 
@@ -48,18 +48,18 @@ void start__process_options_cb(uv_process_options_t* options) {
 }
 
 void start__failure() {
-  estragon_metric_t* metric = estragon_new_metric();
+  forza_metric_t* metric = forza_new_metric();
   metric->service = "health/process/start";
   metric->metric = 0.0;
   metric->description = buffer;
   metric->meta->app->user = user;
   metric->meta->app->name = name;
-  estragon_send(metric);
-  estragon_free_metric(metric);
+  forza_send(metric);
+  forza_free_metric(metric);
 }
 
 void start__success() {
-  estragon_metric_t* metric = estragon_new_metric();
+  forza_metric_t* metric = forza_new_metric();
 
   started = 1;
 
@@ -68,8 +68,8 @@ void start__success() {
   metric->meta->app->user = user;
   metric->meta->app->name = name;
 
-  estragon_send(metric);
-  estragon_free_metric(metric);
+  forza_send(metric);
+  forza_free_metric(metric);
 }
 
 void start__timeout(uv_timer_t* timer, int status) {
@@ -96,7 +96,7 @@ void start__process_exit_cb(int exit_status, int term_signal) {
   }
 }
 
-int start_init(estragon_plugin_t* plugin) {
+int start_init(forza_plugin_t* plugin) {
   size_t size = PATHMAX / sizeof(*lib_path);
 
   lib_path = malloc(size);
