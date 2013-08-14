@@ -185,6 +185,8 @@ int main(int argc, char *argv[]) {
   uv_interface_address_t* addresses;
   uv_err_t err;
 
+  srand(time(NULL));
+
   atexit(forza__kill);
   signal(SIGTERM, forza__on_sigterm);
 

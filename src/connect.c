@@ -14,6 +14,7 @@ static uv_connect_t connect_req;
 
 static int host_index = -1;
 static char** hosts;
+static int hosts_length;
 
 void forza__on_connect(uv_connect_t* req, int status);
 void forza__reconnect_on_close(uv_handle_t* handle);
@@ -73,6 +74,8 @@ void forza_connect(char** hosts_, char* hostname_, forza_connect_cb connect_cb) 
   /* Get the hostname so that it can be provided to the server */
   hostname = hostname_;
   hosts = hosts_;
+  for (hosts_length = 0; hosts[hosts_length] != NULL; hosts_length++);
+  host_index = (rand() % hosts_length) - 1;
   forza__reconnect(connect_cb);
 }
 
