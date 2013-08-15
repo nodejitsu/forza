@@ -61,6 +61,8 @@ void start__failure() {
 void start__success() {
   forza_metric_t* metric = forza_new_metric();
 
+  uv_timer_stop(&timeout_timer);
+
   started = 1;
 
   metric->service = "health/process/start";
