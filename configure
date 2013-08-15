@@ -42,7 +42,7 @@ plugins_h += 'int (*_plugin_init_calls[PLUGIN_COUNT])(forza_plugin_t* plugin) = 
 plugins_h += ', '.join(plugin + '_init' for plugin in plugins) + ' };\n'
 plugins_h += '#endif\n'
 
-arch = args.interposed_dest_cpu or subprocess.check_output(['node', '-p', 'process.arch']).strip()
+arch = args.interposed_dest_cpu or subprocess.check_output(['node', '-pe', 'process.arch']).strip()
 if arch:
     match = {
         'ia32': '-m32',
