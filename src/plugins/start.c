@@ -25,6 +25,8 @@ void start__on_ipc_data(char* data) {
   forza_metric_t* metric;
 
   if (sscanf(data, "port=%hu\n", &port) == 1) {
+    uv_timer_stop(&timeout_timer);
+
     metric = forza_new_metric();
     metric->metric = 1.0;
     metric->service = "health/process/start";
@@ -54,22 +56,6 @@ void start__failure() {
   metric->description = buffer;
   metric->meta->app->user = user;
   metric->meta->app->name = name;
-  forza_send(metric);
-  forza_free_metric(metric);
-}
-
-void start__success() {
-  forza_metric_t* metric = forza_new_metric();
-
-  uv_timer_stop(&timeout_timer);
-
-  started = 1;
-
-  metric->service = "health/process/start";
-  metric->metric = 1.0;
-  metric->meta->app->user = user;
-  metric->meta->app->name = name;
-
   forza_send(metric);
   forza_free_metric(metric);
 }
