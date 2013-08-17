@@ -28,6 +28,9 @@ server.listen(PORT, function () {
   var child = spawn(
     path.join(__dirname, '..', 'forza'),
     [
+      '-h', '127.0.0.1:' + (PORT - 5).toString(),
+      '-h', '127.0.0.1:' + (PORT - 4).toString(),
+      '-h', '127.0.0.1:' + (PORT - 3).toString(),
       '-h', '127.0.0.1:' + (PORT - 2).toString(),
       '-h', '127.0.0.1:' + (PORT - 1).toString(),
       '-h', '127.0.0.1:' + PORT.toString(),
