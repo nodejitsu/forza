@@ -8,42 +8,43 @@ var net = require('net'),
 
 var PORT0 = 5434,
     PORT1 = 5435,
-    gotFirstConnection = false,
+    connections = 0,
     firstClosed = false,
     child;
 
-var server0 = net.createServer(cb(function (socket) {
-  var stream = socket.pipe(jsonStream());
+function onConnection(socket) {
+  var stream = socket.pipe(jsonStream()),
+      server = this;
 
-  console.log('got first connection');
-
-  gotFirstConnection = true;
+  console.log('got connection', this._name);
+  ++connections;
+  console.log(connections);
 
   stream.on('readable', cb(function () {
     var chunk = stream.read();
-    if (chunk && !firstClosed) {
-      console.log('closing first server');
-      server0.close();
+    if (!chunk) {
+      return;
+    }
+    console.dir(chunk);
+
+    if (connections === 1 && !firstClosed) {
+      console.log('first closed');
+      server.close();
       socket.destroy();
       firstClosed = true;
     }
-  }));
-}));
-
-var server1 = net.createServer(cb(function (socket) {
-  var stream = socket.pipe(jsonStream());
-
-  console.log('got second connection');
-  assert(gotFirstConnection);
-
-  stream.on('readable', cb(function () {
-    var chunk = stream.read();
-    if (chunk) {
+    else if (connections >= 2) { // For some reason, `connections === 2` wouldn't work
+      console.log('complete');
+      server.close();
+      socket.destroy();
       child.kill();
       process.exit();
     }
   }));
-}));
+}
+
+var server0 = net.createServer(cb(onConnection)),
+    server1 = net.createServer(cb(onConnection));
 
 server1.listen(PORT1, cb(function () {
   server0.listen(PORT0, cb(function () {
