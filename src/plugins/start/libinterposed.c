@@ -26,7 +26,7 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
 
   if (addr->sa_family == AF_INET) {
     in_addr = (struct sockaddr_in*) addr;
-    in_addr->sin_addr.s_addr = INADDR_ANY;
+    in_addr->sin_addr.s_addr = htonl(INADDR_ANY);
 
     errno = 0;
     result = original_bind(sockfd, addr, addrlen);
@@ -63,7 +63,7 @@ int _so_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen, int ver
 
   if (addr->sa_family == AF_INET) {
     in_addr = (struct sockaddr_in*) addr;
-    in_addr->sin_addr.s_addr = INADDR_ANY;
+    in_addr->sin_addr.s_addr = htonl(INADDR_ANY);
 
     errno = 0;
     result = original_bind(sockfd, addr, addrlen, vers);
