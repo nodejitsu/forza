@@ -1,6 +1,6 @@
 {
   "name": "forza",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "devDependencies": {
     "json-stream": "0.2.x",
     "assert-called": "0.1.x",
