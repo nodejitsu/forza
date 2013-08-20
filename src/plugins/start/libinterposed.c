@@ -26,12 +26,12 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
 
   if (addr->sa_family == AF_INET) {
     in_addr = (struct sockaddr_in*) addr;
+    in_addr->sin_addr.s_addr = INADDR_ANY;
 
     errno = 0;
     result = original_bind(sockfd, addr, addrlen);
     while (result != 0 && (errno == EADDRINUSE || errno == EACCES)) {
       in_addr->sin_port = ntohs(htons(in_addr->sin_port) + 1);
-      in_addr->sin_addr.s_addr = INADDR_ANY;
 
       errno = 0;
       result = original_bind(sockfd, addr, addrlen);
@@ -63,12 +63,12 @@ int _so_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen, int ver
 
   if (addr->sa_family == AF_INET) {
     in_addr = (struct sockaddr_in*) addr;
+    in_addr->sin_addr.s_addr = INADDR_ANY;
 
     errno = 0;
     result = original_bind(sockfd, addr, addrlen, vers);
     while (result != 0 && (errno == EADDRINUSE || errno == EACCES)) {
       in_addr->sin_port = ntohs(htons(in_addr->sin_port) + 1);
-      in_addr->sin_addr.s_addr = INADDR_ANY;
 
       errno = 0;
       result = original_bind(sockfd, addr, addrlen, vers);
