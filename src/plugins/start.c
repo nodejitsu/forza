@@ -4,7 +4,6 @@
 #include <string.h>
 #include <uv.h>
 #include <forza.h>
-#include <saneopt.h>
 
 #define PATHMAX 1024
 
@@ -31,8 +30,6 @@ void start__on_ipc_data(char* data) {
     metric->metric = 1.0;
     metric->service = "health/process/start";
     metric->meta->port = port;
-    metric->meta->app->user = user;
-    metric->meta->app->name = name;
 
     forza_send(metric);
 
@@ -54,8 +51,6 @@ void start__failure() {
   metric->service = "health/process/start";
   metric->metric = 0.0;
   metric->description = buffer;
-  metric->meta->app->user = user;
-  metric->meta->app->name = name;
   forza_send(metric);
   forza_free_metric(metric);
 }
@@ -108,9 +103,6 @@ int start_init(forza_plugin_t* plugin) {
   plugin->process_exit_cb = start__process_exit_cb;
   plugin->stdout_data_cb = start__on_data;
   plugin->stderr_data_cb = start__on_data;
-
-  user = saneopt_get(plugin->saneopt, "app-user");
-  name = saneopt_get(plugin->saneopt, "app-name");
 
   buffer = malloc(sizeof(char) * 1);
   buffer[0] = '\0';
