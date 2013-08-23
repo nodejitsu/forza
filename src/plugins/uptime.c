@@ -1,7 +1,10 @@
 #include <time.h>
 #include <uv.h>
 #include <forza.h>
+#include <saneopt.h>
 
+static char* user;
+static char* name;
 static uv_timer_t uptime_timer;
 time_t start_time;
 
@@ -11,6 +14,9 @@ void uptime__send_uptime(uv_timer_t *timer, int status) {
 
   metric->service = "health/process/uptime";
   metric->metric = (double) (now - start_time);
+  metric->meta->app->user = user;
+  metric->meta->app->name = name;
+
   forza_send(metric);
 
   forza_free_metric(metric);
@@ -34,6 +40,9 @@ int uptime_init(forza_plugin_t* plugin) {
 
   uv_timer_init(uv_default_loop(), &uptime_timer);
   uv_timer_start(&uptime_timer, uptime__send_uptime, 0, 5000);
+
+  user = saneopt_get(plugin->saneopt, "app-user");
+  name = saneopt_get(plugin->saneopt, "app-name");
 
   return 0;
 }
