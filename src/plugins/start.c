@@ -16,9 +16,6 @@ static uv_timer_t timeout_timer;
 uv_loop_t* loop;
 char* lib_path;
 
-static char* user;
-static char* name;
-
 void start__on_ipc_data(char* data) {
   unsigned short port;
   forza_metric_t* metric;
