@@ -6,7 +6,6 @@
 #include <uv.h>
 
 #include <forza.h>
-#include <saneopt.h>
 
 static char* hostname;
 static uv_tcp_t client;
@@ -73,7 +72,10 @@ void forza__reconnect(forza_connect_cb connect_cb) {
   }
 }
 
-void forza_connect(char** hosts_, char* hostname_, forza_connect_cb connect_cb) {
+void forza_connect(char** hosts_, char* hostname_, char* user_, char* name_, forza_connect_cb connect_cb) {
+  /* set user and app name to be used in metric if they exist */
+  user = user_;
+  name = name_;
   /* Get the hostname so that it can be provided to the server */
   hostname = hostname_;
   hosts = hosts_;
@@ -130,9 +132,6 @@ forza_metric_t* forza_new_metric() {
     return NULL;
   }
 
-  user = saneopt_get(plugin->saneopt, "app-user");
-  name = saneopt_get(plugin->saneopt, "app-name");
-
   metric->time = (time_t) - 1;
   metric->service = NULL;
   metric->description = NULL;
@@ -141,8 +140,8 @@ forza_metric_t* forza_new_metric() {
   metric->meta->port = (unsigned short) - 1;
 
   metric->meta->app = malloc(sizeof(forza_metric_meta_app_t));
-  metric->meta->app->user = user;
-  metric->meta->app->name = name;
+  metric->meta->app->user = user ? user : NULL;
+  metric->meta->app->name = name ? name : NULL;
 
   return metric;
 }
