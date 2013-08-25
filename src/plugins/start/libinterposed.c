@@ -10,7 +10,11 @@
 int __interposed_ipc = 3;
 
 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
-  int result;
+  int result, r;
+
+  int socket_type;
+  socklen_t socket_type_len = sizeof(socket_type);
+
   char msg[128];
   int msg_length;
   struct sockaddr_in* in_addr;
@@ -27,6 +31,16 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
   if (addr->sa_family == AF_INET) {
     in_addr = (struct sockaddr_in*) addr;
     in_addr->sin_addr.s_addr = htonl(INADDR_ANY);
+
+    r = getsockopt(sockfd, SOL_SOCKET, SO_TYPE, &socket_type, &socket_type_len);
+    if (r != 0) {
+      return r;
+    }
+
+    if (socket_type == SOCK_DGRAM) {
+      errno = 0;
+      return original_bind(sockfd, addr, addrlen);
+    }
 
     errno = 0;
     result = original_bind(sockfd, addr, addrlen);
@@ -47,7 +61,11 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
 }
 
 int _so_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen, int vers) {
-  int result;
+  int result, r;
+
+  int socket_type;
+  socklen_t socket_type_len = sizeof(socket_type);
+
   char msg[128];
   int msg_length;
   struct sockaddr_in* in_addr;
@@ -64,6 +82,16 @@ int _so_bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen, int ver
   if (addr->sa_family == AF_INET) {
     in_addr = (struct sockaddr_in*) addr;
     in_addr->sin_addr.s_addr = htonl(INADDR_ANY);
+
+    r = getsockopt(sockfd, SOL_SOCKET, SO_TYPE, &socket_type, &socket_type_len);
+    if (r != 0) {
+      return r;
+    }
+
+    if (socket_type == SOCK_DGRAM) {
+      errno = 0;
+      return original_bind(sockfd, addr, addrlen, vers);
+    }
 
     errno = 0;
     result = original_bind(sockfd, addr, addrlen, vers);
