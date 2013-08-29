@@ -12,8 +12,5 @@
   },
   "bin": {
     "forza": "forza"
-  },
-  "publishConfig": {
-    "registry": "http://reg.njitsu.net:5984"
   }
 }
