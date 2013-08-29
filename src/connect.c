@@ -15,6 +15,8 @@ static uv_connect_t connect_req;
 static int host_index = -1;
 static char** hosts;
 static int hosts_length;
+static char* user = NULL;
+static char* name = NULL;
 
 void forza__on_connect(uv_connect_t* req, int status);
 void forza__reconnect_on_close(uv_handle_t* handle);
@@ -70,7 +72,10 @@ void forza__reconnect(forza_connect_cb connect_cb) {
   }
 }
 
-void forza_connect(char** hosts_, char* hostname_, forza_connect_cb connect_cb) {
+void forza_connect(char** hosts_, char* hostname_, char* user_, char* name_, forza_connect_cb connect_cb) {
+  /* set user and app name to be used in metric if they exist */
+  user = user_;
+  name = name_;
   /* Get the hostname so that it can be provided to the server */
   hostname = hostname_;
   hosts = hosts_;
@@ -135,8 +140,8 @@ forza_metric_t* forza_new_metric() {
   metric->meta->port = (unsigned short) - 1;
 
   metric->meta->app = malloc(sizeof(forza_metric_meta_app_t));
-  metric->meta->app->user = NULL;
-  metric->meta->app->name = NULL;
+  metric->meta->app->user = user ? user : NULL;
+  metric->meta->app->name = name ? name : NULL;
 
   return metric;
 }

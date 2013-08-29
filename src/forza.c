@@ -181,6 +181,8 @@ void forza__on_sigterm() {
 int main(int argc, char *argv[]) {
   char** hosts;
   char* hostname;
+  char* user;
+  char* name;
   int i, c = 0;
   uv_interface_address_t* addresses;
   uv_err_t err;
@@ -202,6 +204,8 @@ int main(int argc, char *argv[]) {
   saneopt_alias(opt, "host", "h");
   hosts = saneopt_get_all(opt, "host");
   hostname = saneopt_get(opt, "hostname");
+  user = saneopt_get(opt, "app-user");
+  name = saneopt_get(opt, "app-name");
   arguments = saneopt_arguments(opt);
 
   if (hostname == NULL) {
@@ -222,7 +226,7 @@ int main(int argc, char *argv[]) {
     uv_free_interface_addresses(addresses, c);
   }
 
-  forza_connect(hosts, hostname, on_connect);
+  forza_connect(hosts, hostname, user, name, on_connect);
 
   uv_run(loop, UV_RUN_DEFAULT);
 
