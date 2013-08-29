@@ -15,8 +15,8 @@ static uv_connect_t connect_req;
 static int host_index = -1;
 static char** hosts;
 static int hosts_length;
-static char* user;
-static char* name;
+static char* user = NULL;
+static char* name = NULL;
 
 void forza__on_connect(uv_connect_t* req, int status);
 void forza__reconnect_on_close(uv_handle_t* handle);
