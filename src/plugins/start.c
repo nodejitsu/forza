@@ -13,8 +13,8 @@ static int started = 0;
 
 static uv_timer_t timeout_timer;
 
-uv_loop_t* loop;
-char* lib_path;
+static uv_loop_t* loop;
+static char* lib_path;
 
 void start__on_ipc_data(char* data) {
   unsigned short port;

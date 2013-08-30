@@ -13,8 +13,8 @@
 static uv_loop_t *loop;
 extern char** environ;
 
-forza_plugin_t plugins[PLUGIN_COUNT];
-char** arguments;
+static forza_plugin_t plugins[PLUGIN_COUNT];
+static char** arguments;
 
 //
 // Pipes for child process I/O.
