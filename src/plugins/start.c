@@ -16,6 +16,37 @@ static uv_timer_t timeout_timer;
 static uv_loop_t* loop;
 static char* lib_path;
 
+static uv_fs_t log_file;
+static uv_file log_file_fd;
+
+void start__on_log_file_write(uv_fs_t* req) {
+  uv_fs_close(loop, &log_file, log_file_fd, NULL);
+  uv_fs_req_cleanup(&log_file);
+  log_file_fd = -1;
+}
+
+void start__send_and_write(forza_metric_t* metric) {
+  char* json;
+  uv_loop_t* loop = uv_default_loop();
+
+  metric->time = time(NULL);
+
+  if (log_file_fd != -1) {
+    json = forza_json_stringify(metric);
+    uv_fs_write(
+      loop,
+      &log_file,
+      log_file_fd,
+      json,
+      strlen(json),
+      0,
+      start__on_log_file_write
+    );
+  }
+
+  forza_send(metric);
+}
+
 void start__on_ipc_data(char* data) {
   unsigned short port;
   forza_metric_t* metric;
@@ -28,7 +59,7 @@ void start__on_ipc_data(char* data) {
     metric->service = "health/process/start";
     metric->meta->port = port;
 
-    forza_send(metric);
+    start__send_and_write(metric);
 
     forza_free_metric(metric);
   }
@@ -48,7 +79,7 @@ void start__failure() {
   metric->service = "health/process/start";
   metric->metric = 0.0;
   metric->description = buffer;
-  forza_send(metric);
+  start__send_and_write(metric);
   forza_free_metric(metric);
 }
 
@@ -77,6 +108,7 @@ void start__process_exit_cb(int exit_status, int term_signal) {
 }
 
 int start_init(forza_plugin_t* plugin) {
+  char* log_file_path;
   size_t size = PATHMAX / sizeof(*lib_path);
 
   lib_path = malloc(size);
@@ -93,6 +125,26 @@ int start_init(forza_plugin_t* plugin) {
 #else
   strcpy(strrchr(lib_path, '/') + 1, "libinterposed.so");
 #endif
+
+  log_file_path = saneopt_get(plugin->saneopt, "start-log");
+
+  if (log_file_path != NULL) {
+    log_file_fd = uv_fs_open(
+      loop,
+      &log_file,
+      log_file_path,
+      O_WRONLY | O_CREAT | O_TRUNC,
+      S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH,
+      NULL
+    );
+
+    if (log_file_fd == -1) {
+      return -1;
+    }
+  }
+  else {
+    log_file_fd = -1;
+  }
 
   plugin->process_options_cb = start__process_options_cb;
   plugin->ipc_data_cb = start__on_ipc_data;

@@ -135,6 +135,7 @@ forza_metric_t* forza_new_metric() {
   metric->time = (time_t) - 1;
   metric->service = NULL;
   metric->description = NULL;
+  metric->host = hostname;
 
   metric->meta->uptime = (long long int) - 1;
   metric->meta->port = (unsigned short) - 1;
@@ -162,8 +163,6 @@ void forza_send(forza_metric_t* metric) {
   if (!uv_is_writable(connect_req.handle)) {
     return;
   }
-
-  metric->host = hostname;
 
   if (metric->time == ((time_t) - 1)) {
     metric->time = time(NULL);
