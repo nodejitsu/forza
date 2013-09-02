@@ -3,6 +3,11 @@ The Monitoring Agent.
 
 ## Build
 
+### Pull in third-party submodules
+
+	git submodule init
+	git submodule update
+
 ### `./configure` options
 
   * `--with-plugin <plugin>` - enable plugin `<plugin>` (see Plugins section)
