@@ -2,12 +2,27 @@
 #include <dlfcn.h>
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
 int __interposed_ipc = 3;
+
+static void __interposed_init() __attribute__((constructor));
+
+#pragma CALL_ON_MODULE_BIND __interposed_init
+#pragma CALL_ON_LOAD __interposed_init
+#pragma init(__interposed_init)
+void __interposed_init() {
+#if (__APPLE__ && __MACH__)
+  unsetenv("DYLD_INSERT_LIBRARIES");
+  unsetenv("DYLD_FORCE_FLAT_NAMESPACE");
+#else
+  unsetenv("LD_PRELOAD");
+#endif
+}
 
 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen) {
   int result, r;
