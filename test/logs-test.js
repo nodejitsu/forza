@@ -18,8 +18,8 @@ var server = net.createServer(cb(function (socket) {
     if (chunk && chunk.service.indexOf('logs/') === 0) {
       service[chunk.service] += chunk.description.split('\n').filter(Boolean).length;
       assert(chunk.description.match(chunk.service === 'logs/stdout'
-        ? /Hello, stdout!\n/
-        : /Hello, stderr!\n/
+        ? /Hello, \x1b\[32mstdout\x1b\[39m!\n/
+        : /Hello, \x1b\[31mstderr\x1b\[39m!\n/
       ));
     }
   }));

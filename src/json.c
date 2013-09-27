@@ -6,7 +6,26 @@
 #include <forza.h>
 
 char* forza__json_escape(char* string) {
-  char* result = malloc((2 * strlen(string) + 1) * sizeof(char));
+  char* result;
+  int i;
+  int length = 0;
+  int str_len = strlen(string);
+
+  for (i = 0; i < str_len; i++) {
+    switch (string[i]) {
+      case '\\':
+      case '"':
+      case '\b':
+      case '\f':
+      case '\n':
+      case '\r':
+      case '\t':   length += 2; break;
+      case '\x1b': length += 6; break;
+      default:     length++;
+    }
+  }
+
+  result = malloc(sizeof(*result) * (length + 1));
 
   if (result == NULL) {
     return NULL;
@@ -14,18 +33,18 @@ char* forza__json_escape(char* string) {
 
   result[0] = '\0';
 
-  while (*string != '\0') {
-    switch (*string) {
-      case '\\': strcat(result, "\\\\"); break;
-      case '"':  strcat(result, "\\\""); break;
-      case '\b': strcat(result, "\\b");  break;
-      case '\f': strcat(result, "\\f"); break;
-      case '\n': strcat(result, "\\n"); break;
-      case '\r': strcat(result, "\\r"); break;
-      case '\t': strcat(result, "\\t"); break;
-      default:   strncat(result, string, 1); break;
+  for (i = 0; i < str_len; i++) {
+    switch (string[i]) {
+      case '\\':   strcat(result, "\\\\"); break;
+      case '"':    strcat(result, "\\\""); break;
+      case '\b':   strcat(result, "\\b");  break;
+      case '\f':   strcat(result, "\\f"); break;
+      case '\n':   strcat(result, "\\n"); break;
+      case '\r':   strcat(result, "\\r"); break;
+      case '\t':   strcat(result, "\\t"); break;
+      case '\x1b': strcat(result, "\\u001b"); break;
+      default:     strncat(result, &string[i], 1); break;
     }
-    ++string;
   }
 
   return result;
