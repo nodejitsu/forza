@@ -23,7 +23,7 @@ static uv_pipe_t child_stdout;
 static uv_pipe_t child_stderr;
 static uv_pipe_t child_ipc;
 
-static uv_process_t* child;
+static uv_process_t* child = NULL;
 
 static saneopt_t* opt;
 
@@ -167,8 +167,10 @@ void on_connect(int status) {
 }
 
 void forza__kill() {
-  printf("killing child...\n");
-  uv_process_kill(child, SIGKILL);
+  if (child != NULL) {
+    printf("killing child...\n");
+    uv_process_kill(child, SIGKILL);
+  }
 }
 
 void forza__on_sigterm() {
