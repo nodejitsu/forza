@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,12 +13,13 @@ static uv_tcp_t client;
 static uv_loop_t* loop;
 static uv_connect_t connect_req;
 
-static int host_index = -1;
-static char** hosts;
-static int hosts_length;
+static struct addrinfo* first_host;
+static struct addrinfo* host;
+static int port;
 static char* user = NULL;
 static char* name = NULL;
 
+void forza__reconnect(forza_connect_cb connect_cb);
 void forza__on_connect(uv_connect_t* req, int status);
 void forza__reconnect_on_close(uv_handle_t* handle);
 void forza__reconnect_on_connect_error(uv_handle_t* handle);
@@ -25,35 +27,28 @@ void forza__reconnect_on_connect_error(uv_handle_t* handle);
 void forza__reconnect(forza_connect_cb connect_cb) {
   char* pair;
   char* port_sep;
-  char host[16];
+  char addr_str[17] = {'\0'};
   int r;
-  int port;
-  struct sockaddr_in addr;
 
-  ++host_index;
-  pair = hosts[host_index];
-  if (pair == NULL) {
-    host_index = 0;
-    pair = hosts[host_index];
+  host = host->ai_next;
+  if (host == NULL) {
+    host = first_host;
   }
 
-  port_sep = strchr(pair, ':');
-  strncpy(host, pair, port_sep - pair);
-  host[port_sep - pair] = '\0';
-  sscanf(port_sep + 1, "%d", &port);
-
-  printf("connecting to %s:%d...\n", host, port);
-
-  addr = uv_ip4_addr(host, port);
-
-  loop = uv_default_loop();
+  uv_ip4_name((struct sockaddr_in*) host->ai_addr, addr_str, 16);
+  printf("connecting to %s:%d...\n", addr_str, port);
 
   connect_req.data = (void*) connect_cb;
 
   /* Set up a TCP keepalive connection to the godot server */
   uv_tcp_init(loop, &client);
   uv_tcp_keepalive(&client, 1, 180);
-  r = uv_tcp_connect(&connect_req, &client, addr, forza__on_connect);
+  r = uv_tcp_connect(
+    &connect_req,
+    &client,
+    *(struct sockaddr_in*) host->ai_addr,
+    forza__on_connect
+  );
 
   if (r != 0) {
     //
@@ -72,15 +67,46 @@ void forza__reconnect(forza_connect_cb connect_cb) {
   }
 }
 
-void forza_connect(char** hosts_, char* hostname_, char* user_, char* name_, forza_connect_cb connect_cb) {
+void forza_connect(char* host_, int port_, char* hostname_, char* user_, char* name_, forza_connect_cb connect_cb) {
+  struct addrinfo hints;
+  struct addrinfo* t;
+  int r, count, random;
+  char port_str[6];
+
+  loop = uv_default_loop();
+
   /* set user and app name to be used in metric if they exist */
   user = user_;
   name = name_;
   /* Get the hostname so that it can be provided to the server */
   hostname = hostname_;
-  hosts = hosts_;
-  for (hosts_length = 0; hosts[hosts_length] != NULL; hosts_length++);
-  host_index = (rand() % hosts_length) - 1;
+  port = port_;
+
+  hints.ai_family = PF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_protocol = IPPROTO_TCP;
+  hints.ai_flags = 0;
+
+  //
+  // Do this synchronously since we're not doing anything important anyway.
+  //
+  sprintf(port_str, "%d", port);
+  r = getaddrinfo(host_, port_str, &hints, &first_host);
+  if (r == -1) {
+    fprintf(stderr, "getaddrinfo: %s\n", uv_err_name(uv_last_error(loop)));
+    connect_cb(r);
+    return;
+  }
+
+  host = first_host;
+  for (count = 0, t = first_host; t != NULL; t = t->ai_next, count++);
+
+  random = rand() % count;
+
+  while (random-- > 0) {
+    host = host->ai_next;
+  }
+
   forza__reconnect(connect_cb);
 }
 

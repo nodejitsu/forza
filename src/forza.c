@@ -181,10 +181,12 @@ void forza__on_sigterm() {
 }
 
 int main(int argc, char *argv[]) {
-  char** hosts;
+  char* host;
   char* hostname;
   char* user;
   char* name;
+  char* port_str;
+  int port;
   int i, c = 0;
   uv_interface_address_t* addresses;
   uv_err_t err;
@@ -203,12 +205,27 @@ int main(int argc, char *argv[]) {
 #endif
 
   opt = saneopt_init(argc - 1, argv + 1);
+
   saneopt_alias(opt, "host", "h");
-  hosts = saneopt_get_all(opt, "host");
+  saneopt_alias(opt, "port", "p");
+
+  host = saneopt_get(opt, "host");
+  port_str = saneopt_get(opt, "port");
   hostname = saneopt_get(opt, "hostname");
   user = saneopt_get(opt, "app-user");
   name = saneopt_get(opt, "app-name");
   arguments = saneopt_arguments(opt);
+
+  if (host == NULL || port_str == NULL) {
+    fprintf(stderr, "Host and port required\n");
+    return 2;
+  }
+
+  sscanf(port_str, "%d", &port);
+  if (port <= 0 || port > 65535) {
+    fprintf(stderr, "Port has to be <= 0 and > 65535\n");
+    return 3;
+  }
 
   if (hostname == NULL) {
     hostname = malloc(256 * sizeof(*hostname));
@@ -228,11 +245,14 @@ int main(int argc, char *argv[]) {
     uv_free_interface_addresses(addresses, c);
   }
 
-  forza_connect(hosts, hostname, user, name, on_connect);
+  forza_connect(host, port, hostname, user, name, on_connect);
 
   uv_run(loop, UV_RUN_DEFAULT);
 
-  free(hosts);
+  free(host);
+  free(port_str);
+  free(user);
+  free(name);
 
   return 0;
 }
