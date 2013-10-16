@@ -1,6 +1,12 @@
 {
   "name": "forza",
+  "description": "A lightweight agent for Godot",
   "version": "0.2.0",
+  "author": "Nodejitsu Inc <info@nodejitsu.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/opsmezzo/forza.git"
+  },
   "devDependencies": {
     "json-stream": "0.2.x",
     "assert-called": "0.1.x",
