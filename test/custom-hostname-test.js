@@ -33,7 +33,8 @@ server.listen(PORT, function () {
   child = spawn(
     path.join(__dirname, '..', 'forza'),
     [ 
-      '-h', '127.0.0.1:' + PORT.toString(),
+      '-h', '127.0.0.1',
+      '-p',  PORT.toString(),
       '--hostname', HOSTNAME,
       '--', 'node', path.join(__dirname, 'fixtures', 'exit-after-1-s.js')
     ]

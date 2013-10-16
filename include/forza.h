@@ -50,7 +50,7 @@ enum forza__stdio_type {
 } typedef forza__stdio_type_t;
 
 
-void forza_connect(char** hosts, char* hostname, char* user, char* name, forza_connect_cb connect_cb_);
+void forza_connect(char* host, int port, char* hostname, char* user, char* name, forza_connect_cb connect_cb_);
 void forza_send(forza_metric_t* metric);
 void forza_close();
 forza_metric_t* forza_new_metric();
