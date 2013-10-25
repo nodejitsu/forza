@@ -20,8 +20,8 @@ parser.add_argument('--interposed-dest-cpu',
                     help='CPU architecture to build for. Valid values are: ia32, x64')
 args = parser.parse_args()
 
-if os.path.isdir('.git'):
-    version = subprocess.check_output(['git', 'log', '-n1', '--pretty=%h'])
+if os.path.isfile('package.json'):
+    version = subprocess.check_output(['node', '-pe', 'require(\'./package.json\').version']);
     config += 'FORZA_VERSION_HASH = ' + version
 
 plugins = unique(args.with_plugin or ['heartbeat'])
