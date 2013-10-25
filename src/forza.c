@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
   char* name;
   char* port_str;
   int port;
-  int i, c = 0;
+  int i, c, v = 0;
   uv_interface_address_t* addresses;
   uv_err_t err;
 
@@ -199,7 +199,13 @@ int main(int argc, char *argv[]) {
   loop = uv_default_loop();
 
 #ifdef FORZA_VERSION_HASH
-  printf("forza "FORZA_VERSION_HASH"\n");
+  printf("forza %s\n", FORZA_VERSION_HASH);
+  // saneopt doesn't allow options without input
+  for (v = 0; v < argc; v++) {
+    if (strcmp(argv[v], "-v") == 0 || strcmp(argv[v], "--version") == 0) {
+      return 0;
+    }
+  }
 #else
   printf("forza\n");
 #endif
