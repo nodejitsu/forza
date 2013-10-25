@@ -1,11 +1,11 @@
--include config.mk
+include config.mk
 
 OBJS += src/forza.o
 OBJS += src/connect.o
 OBJS += src/json.o
 
 CFLAGS += -g -Wall -Ideps/libuv/include -Ideps/saneopt/include -Ideps/env/include -Iinclude
-ifdef $(FORZA_VERSION_HASH)
+ifdef FORZA_VERSION_HASH
   CFLAGS += -DFORZA_VERSION_HASH='"$(FORZA_VERSION_HASH)"'
 endif
 
@@ -34,7 +34,7 @@ src/plugins/%.o: src/plugins/%.c
 src/plugins/start.o: libinterposed
 
 forza: $(OBJS)
-	gcc $^ deps/libuv/libuv.a deps/saneopt/libsaneopt.a deps/env/libenv.a $(LDFLAGS) -o $@
+	gcc $^ deps/libuv/libuv.a deps/saneopt/libsaneopt.a deps/env/libenv.a $(LDFLAGS) $(CFLAGS) -o $@
 
 libuv:
 	$(MAKE) -C deps/libuv/
