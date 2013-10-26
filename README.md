@@ -20,7 +20,7 @@ make
 
 ## Usage
 ```bash
-./forza -h 127.0.0.1:1337 -- node test/fixtures/listen.js
+./forza -h 127.0.0.1 -p 1337 -- node test/fixtures/listen.js
 ```
 
 ## Plugins
