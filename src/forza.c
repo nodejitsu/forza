@@ -200,12 +200,6 @@ int main(int argc, char *argv[]) {
 
 #ifdef FORZA_VERSION_HASH
   printf("forza %s\n", FORZA_VERSION_HASH);
-  // saneopt doesn't allow options without input
-  for (v = 0; v < argc; v++) {
-    if (strcmp(argv[v], "-v") == 0 || strcmp(argv[v], "--version") == 0) {
-      return 0;
-    }
-  }
 #else
   printf("forza\n");
 #endif
@@ -214,6 +208,11 @@ int main(int argc, char *argv[]) {
 
   saneopt_alias(opt, "host", "h");
   saneopt_alias(opt, "port", "p");
+  saneopt_alias(opt, "version", "v");
+
+  if (saneopt_has(opt, "version")) {
+    return 0;
+  }
 
   host = saneopt_get(opt, "host");
   port_str = saneopt_get(opt, "port");
