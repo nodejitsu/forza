@@ -5,8 +5,7 @@ The Monitoring Agent.
 
 ### Pull in third-party submodules
 
-	git submodule init
-	git submodule update
+	git submodule update --init
 
 ### `./configure` options
 
