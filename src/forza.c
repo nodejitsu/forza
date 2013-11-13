@@ -253,6 +253,7 @@ int main(int argc, char *argv[]) {
   free(port_str);
   free(user);
   free(name);
+  free(hostname);
 
   return 0;
 }
