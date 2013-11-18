@@ -25,8 +25,6 @@ void forza__reconnect_on_close(uv_handle_t* handle);
 void forza__reconnect_on_connect_error(uv_handle_t* handle);
 
 void forza__reconnect(forza_connect_cb connect_cb) {
-  char* pair;
-  char* port_sep;
   char addr_str[17] = {'\0'};
   int r;
 
