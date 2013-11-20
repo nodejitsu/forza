@@ -144,6 +144,11 @@ void spawn() {
   uv_read_start(options.stdio[1].data.stream, forza__on_alloc, forza__on_stdout_read);
   uv_read_start(options.stdio[2].data.stream, forza__on_alloc, forza__on_stderr_read);
   uv_read_start(options.stdio[3].data.stream, forza__on_alloc, forza__on_ipc_read);
+
+  // Switch to using `options->env` here instead of `env`, since plugins can
+  // override `options->env` using, for example `env_set`, like in the start
+  // plugin.
+  env_free(options.env);
 }
 
 void on_connect(int status) {
@@ -255,8 +260,13 @@ int main(int argc, char *argv[]) {
 
   uv_run(loop, UV_RUN_DEFAULT);
 
+  /*free(hostname);
+  free(opt);*/
+  free(host);
+  free(port_str);
+  free(user);
+  free(name);
   free(hostname);
-  free(opt);
 
   return 0;
 }
