@@ -20,8 +20,13 @@ static uv_fs_t log_file;
 static uv_file log_file_fd;
 
 void start__on_log_file_write(uv_fs_t* req) {
+  //
+  // Remark: shouldnt this be cleaned up as well?
+  //
+  uv_fs_req_cleanup(req);
   uv_fs_close(loop, &log_file, log_file_fd, NULL);
   uv_fs_req_cleanup(&log_file);
+
   log_file_fd = -1;
 }
 
