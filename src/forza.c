@@ -245,7 +245,7 @@ int main(int argc, char *argv[]) {
        * TODO: Make this smarter.
        */
       if (addresses[i].is_internal) continue;
-      uv_ip4_name(&addresses[i].address.address4, hostname, 255 * sizeof(*hostname));
+      uv_ip4_name(&addresses[i].address.address4, hostname, 256 * sizeof(*hostname));
       if (strcmp(hostname, "0.0.0.0") != 0) break;
     }
     uv_free_interface_addresses(addresses, c);
