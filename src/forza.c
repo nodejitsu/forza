@@ -260,13 +260,8 @@ int main(int argc, char *argv[]) {
 
   uv_run(loop, UV_RUN_DEFAULT);
 
-  /*free(hostname);
-  free(opt);*/
-  free(host);
-  free(port_str);
-  free(user);
-  free(name);
   free(hostname);
+  free(opt);
 
   return 0;
 }
