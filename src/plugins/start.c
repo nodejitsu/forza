@@ -10,6 +10,7 @@
 static char* buffer = NULL;
 static size_t buffer_len = 0;
 static int started = 0;
+static int retried = 0;
 
 static uv_timer_t timeout_timer;
 
@@ -58,6 +59,7 @@ void start__on_ipc_data(char* data) {
 
   if (sscanf(data, "port=%hu\n", &port) == 1) {
     uv_timer_stop(&timeout_timer);
+    started = 1;
 
     metric = forza_new_metric();
     metric->metric = 1.0;
@@ -88,8 +90,17 @@ void start__failure() {
   forza_free_metric(metric);
 }
 
+//
+// Lets add one retry and see what happens
+//
 void start__timeout(uv_timer_t* timer, int status) {
-  start__failure();
+  if (!started && !retried) {
+    retried = 1;
+    uv_timer_start(&timeout_timer, start__timeout, 1500, 0);
+  }
+  else if (!started && retried) {
+    start__failure();
+  }
 }
 
 void start__on_data(char* data) {
