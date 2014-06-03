@@ -66,3 +66,7 @@ Tests require all plugins:
 ./build
 npm test
 ```
+
+## License
+`forza` is released under the MIT license. See the [LICENSE](https://github.com/opsmezzo/forza/blob/master/LICENSE)
+file for more information.
