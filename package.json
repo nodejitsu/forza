@@ -18,5 +18,6 @@
   },
   "bin": {
     "forza": "forza"
-  }
+  },
+  "license": "MIT"
 }
